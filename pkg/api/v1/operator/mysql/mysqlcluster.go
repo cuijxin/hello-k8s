@@ -25,7 +25,7 @@ const (
 // @Accept json
 // @Produce json
 // @param data body mysql.CreateClusterRequest true "创建 MySQL 集群所需参数."
-// @Success 200 {object} v1.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster [post]
 func CreateCluster(c *gin.Context) {
 	log.Debug("调用创建 MySQL 集群函数")
@@ -76,7 +76,7 @@ func CreateCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param data body mysql.DeleteClusterRequest true "删除 MySQL 集群时所需的参数."
-// @Success 200 {object} Response "{"code":0,"message":"OK","data":{}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{}}"
 // @Router /cluster/mysqlcluster [delete]
 func DeleteCluster(c *gin.Context) {
 	log.Debug("调用删除 MySQL 集群的函数.")
@@ -111,7 +111,7 @@ func DeleteCluster(c *gin.Context) {
 // @Produce json
 // @param name path string true "postgres cluster name".
 // @param namespace path string true "namespace".
-// @Success 200 {object} Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster/detail/{name}/{namespace} [get]
 func GetCluster(c *gin.Context) {
 	log.Debug("调用查询指定的 MySQL 集群信息的函数.")
@@ -143,7 +143,7 @@ func GetCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param namespace path string true "namespace"
-// @Success 200 {object} Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster/list/{namespace} [get]
 func GetClusterList(c *gin.Context) {
 	log.Debug("获取某一命名空间下的 MySQL 集群列表.")
