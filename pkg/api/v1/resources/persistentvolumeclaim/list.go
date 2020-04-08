@@ -7,7 +7,7 @@ import (
 	pvc "hello-k8s/pkg/kubernetes/kuberesource/resource/persistentvolumeclaim"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -17,21 +17,21 @@ import (
 // @Description 获取某一用户创建的所有PersistentVolumeClaim对象
 // @Tags resource
 // @Param namespace path string true "用户的命名空间"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /resource/persistentvolumeclaim/list/{namespace} [get]
 func GetPersistentVolumeClaimList(c *gin.Context) {
 	log.Info("调用获取PersistentVolumeClaim对象列表的函数")
 
 	namespace := c.Param("namespace")
 	if namespace == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -41,9 +41,9 @@ func GetPersistentVolumeClaimList(c *gin.Context) {
 	namespaceQuery := common.NewNamespaceQuery(namespaceMap)
 	list, err := pvc.GetPersistentVolumeClaimList(clientset, namespaceQuery, dsQuery)
 	if err != nil {
-		SendResponse(c, errno.ErrGetPersistentVolumeClaimList, err)
+		tool.SendResponse(c, errno.ErrGetPersistentVolumeClaimList, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, list)
+	tool.SendResponse(c, errno.OK, list)
 }

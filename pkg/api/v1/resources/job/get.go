@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/job"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param name path string true "Job对象名称"
 // @Param namespace path string true "用户的命名空间"
-// @Success 200 {object} handler.Response "{"code":200, "message":"OK", "data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /resource/job/detail/{name}/{namespace} [get]
 func GetJob(c *gin.Context) {
 	log.Debug("调用查询某一 Job 对象的函数.")
@@ -26,22 +26,22 @@ func GetJob(c *gin.Context) {
 	name := c.Param("name")
 	namespace := c.Param("namespace")
 	if namespace == "" || name == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	job, err := job.GetJobDetail(clientset, namespace, name)
 	if err != nil {
-		SendResponse(c, errno.ErrGetJob, err)
+		tool.SendResponse(c, errno.ErrGetJob, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, job)
+	tool.SendResponse(c, errno.OK, job)
 }

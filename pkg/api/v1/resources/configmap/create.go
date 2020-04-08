@@ -2,7 +2,7 @@ package configmap
 
 import (
 	"encoding/base64"
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
@@ -18,34 +18,34 @@ import (
 // @Accept json
 // @Produce json
 // @param data body configmap.CreateConfigMapRequest true "创建 ConfigMap 对象时所需参数"
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /resource/configmap/create [post]
 func Create(c *gin.Context) {
 	log.Debug("调用创建 ConfigMap 对象的函数")
 
 	var r CreateConfigMapRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	cm := newConfigMap(r)
 	result, err := clientset.CoreV1().ConfigMaps(r.Namespace).Create(cm)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateConfigMap, err)
+		tool.SendResponse(c, errno.ErrCreateConfigMap, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newConfigMap(r CreateConfigMapRequest) *v1.ConfigMap {

@@ -1,7 +1,7 @@
 package service
 
 import (
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/service"
@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @Param name path string true "Service 对象名称"
 // @Param namespace path string true "用户的命名空间"
-// @Success 200 {object} handler.Response "{"code":200, "message":"OK", "data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /resource/service/pods/{name}/{namespace} [get]
 func GetServicePods(c *gin.Context) {
 	log.Info("调用获取 Service 对象对应的 Pods 列表函数.")
@@ -26,14 +26,14 @@ func GetServicePods(c *gin.Context) {
 	name := c.Param("name")
 	namespace := c.Param("namespace")
 	if namespace == "" || name == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -41,9 +41,9 @@ func GetServicePods(c *gin.Context) {
 
 	podList, err := service.GetServicePods(clientset, nil, namespace, name, dsQuery)
 	if err != nil {
-		SendResponse(c, errno.ErrGetServicePodsList, err)
+		tool.SendResponse(c, errno.ErrGetServicePodsList, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, podList)
+	tool.SendResponse(c, errno.OK, podList)
 }

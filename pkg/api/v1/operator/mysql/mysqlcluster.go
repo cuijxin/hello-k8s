@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"reflect"
@@ -25,29 +25,29 @@ const (
 // @Accept json
 // @Produce json
 // @param data body mysql.CreateClusterRequest true "创建 MySQL 集群所需参数."
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} v1.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster [post]
 func CreateCluster(c *gin.Context) {
 	log.Debug("调用创建 MySQL 集群函数")
 
 	var r CreateClusterRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	customClientset, err := client.NewMySQLClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	err = CheckMySQLClusterRBAC(
 		r.Namespace,
@@ -56,18 +56,18 @@ func CreateCluster(c *gin.Context) {
 		defaultAgentClusterRoleName,
 		clientset)
 	if err != nil {
-		SendResponse(c, errno.ErrMySQLRBACCheck, err)
+		tool.SendResponse(c, errno.ErrMySQLRBACCheck, err)
 		return
 	}
 
 	mysqlCluster := newMySQLCluster(r)
 	result, err := customClientset.MySQLV1alpha1().Clusters(r.Namespace).Create(mysqlCluster)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateMySQLCluster, err)
+		tool.SendResponse(c, errno.ErrCreateMySQLCluster, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 // @Summary 删除 Kubernetes 集群中的指定的 MySQL 集群.
@@ -76,19 +76,19 @@ func CreateCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param data body mysql.DeleteClusterRequest true "删除 MySQL 集群时所需的参数."
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{}}"
+// @Success 200 {object} Response "{"code":0,"message":"OK","data":{}}"
 // @Router /cluster/mysqlcluster [delete]
 func DeleteCluster(c *gin.Context) {
 	log.Debug("调用删除 MySQL 集群的函数.")
 
 	customClientset, err := client.NewMySQLClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
 	}
 
 	var r DeleteClusterRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
@@ -97,11 +97,11 @@ func DeleteCluster(c *gin.Context) {
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		log.Error("Delete MySQL Cluster object failed.", err)
-		SendResponse(c, errno.ErrDeleteMySQLCluster, err)
+		tool.SendResponse(c, errno.ErrDeleteMySQLCluster, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 // @Summary 查询指定的 MySQL 集群信息.
@@ -111,7 +111,7 @@ func DeleteCluster(c *gin.Context) {
 // @Produce json
 // @param name path string true "postgres cluster name".
 // @param namespace path string true "namespace".
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster/detail/{name}/{namespace} [get]
 func GetCluster(c *gin.Context) {
 	log.Debug("调用查询指定的 MySQL 集群信息的函数.")
@@ -119,22 +119,22 @@ func GetCluster(c *gin.Context) {
 	name := c.Param("name")
 	namespace := c.Param("namespace")
 	if namespace == "" || name == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	customClientset, err := client.NewMySQLClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
 	}
 
 	result, err := customClientset.MySQLV1alpha1().Clusters(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		SendResponse(c, errno.ErrGetMySQLCluster, err)
+		tool.SendResponse(c, errno.ErrGetMySQLCluster, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 // @Summary 获取某一命名空间下的 MySQL 集群列表.
@@ -143,27 +143,27 @@ func GetCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param namespace path string true "namespace"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/mysqlcluster/list/{namespace} [get]
 func GetClusterList(c *gin.Context) {
 	log.Debug("获取某一命名空间下的 MySQL 集群列表.")
 	namespace := c.Param("namespace")
 	if namespace == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	customClientset, err := client.NewMySQLClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateMySQLClientSet, nil)
 	}
 	result, err := customClientset.MySQLV1alpha1().Clusters(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		SendResponse(c, errno.ErrGetMySQLClusterList, err)
+		tool.SendResponse(c, errno.ErrGetMySQLClusterList, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newMySQLCluster(r CreateClusterRequest) *v1alpha1.Cluster {

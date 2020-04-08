@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/container"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -16,7 +16,7 @@ import (
 // @Tags resource
 // @Param podId path string true "Pod ID"
 // @Param namespace path string true "命名空间"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /resource/pod/container/{podId}/{namespace} [get]
 func GetPodContainers(c *gin.Context) {
 	log.Debug("调用获取某一 Pod 对象中的所有Containers对象的函数.")
@@ -24,22 +24,22 @@ func GetPodContainers(c *gin.Context) {
 	podID := c.Param("podId")
 	namespace := c.Param("namespace")
 	if podID == "" || namespace == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	containers, err := container.GetPodContainers(clientset, namespace, podID)
 	if err != nil {
-		SendResponse(c, errno.ErrGetPodContainers, err)
+		tool.SendResponse(c, errno.ErrGetPodContainers, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, containers)
+	tool.SendResponse(c, errno.OK, containers)
 }

@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
@@ -46,34 +46,34 @@ const (
 // @Accept json
 // @Produce json
 // @param data body mysql.CreateOperatorRequest true "安装MySQL Operator组件时所需参数."
-// @Success 200 {object} handler.Response  "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response  "{"code":0,"message":"OK","data":{""}}"
 // @Router /operator/mysqloperator [post]
 func CreateOperator(c *gin.Context) {
 	log.Debug("调用安装 MySQL Operator 组件的函数.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	apiExtensionsClientset, err := client.NewApiExtensionsClient()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateApiClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateApiClientSet, nil)
 	}
 
 	var r CreateOperatorRequest
 	if err := c.Bind(&r); err != nil {
-		SendResponse(c, errno.ErrBind, nil)
+		tool.SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
 	if err := Deploy(r.Namespace, clientset, apiExtensionsClientset); err != nil {
 		log.Error("create mysql operator err: %v", err)
-		SendResponse(c, errno.ErrCreateMySQLOperator, err)
+		tool.SendResponse(c, errno.ErrCreateMySQLOperator, err)
 	}
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 // @Summary 从Kubernetes集群中删除mysql operator组件
@@ -82,25 +82,25 @@ func CreateOperator(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param data body mysql.DeleteOperatorRequest true "删除MySQL Operator组件时所需的参数"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /operator/mysqloperator [delete]
 func DeleteOperator(c *gin.Context) {
 	log.Debug("调用删除MySQL Operator组件的函数.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	apiExtensionsClientset, err := client.NewApiExtensionsClient()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateApiClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateApiClientSet, nil)
 	}
 
 	var r DeleteOperatorRequest
 	if err := c.Bind(&r); err != nil {
-		SendResponse(c, errno.ErrBind, nil)
+		tool.SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
@@ -118,12 +118,12 @@ func DeleteOperator(c *gin.Context) {
 	apiExtensionsClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(MYSQLBACKUPNAME, opt)
 	apiExtensionsClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(MYSQLCLUSTERNAME, opt)
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 // 部署 mysql operator 组件.
 func Deploy(namespace string, client clientset.Interface, apiExtensionsClient *apiextensionsclientset.Clientset) error {
-	CreateNamespace(namespace, client)
+	tool.CreateNamespace(namespace, client)
 
 	mysqlClusterCRD := newMySQLClusterCRD()
 	if _, err := apiExtensionsClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(mysqlClusterCRD); err != nil {
@@ -141,11 +141,11 @@ func Deploy(namespace string, client clientset.Interface, apiExtensionsClient *a
 	if _, err := apiExtensionsClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(mysqlBackupScheduleCRD); err != nil {
 		return err
 	}
-	mysqlOperatorServiceAccount := NewServiceAccount(MYSQLOPERATOR)
+	mysqlOperatorServiceAccount := tool.NewServiceAccount(MYSQLOPERATOR)
 	if _, err := client.CoreV1().ServiceAccounts(namespace).Create(mysqlOperatorServiceAccount); err != nil {
 		return err
 	}
-	mysqlAgentServiceAccount := NewServiceAccount(MYSQLAGENT)
+	mysqlAgentServiceAccount := tool.NewServiceAccount(MYSQLAGENT)
 	if _, err := client.CoreV1().ServiceAccounts(namespace).Create(mysqlAgentServiceAccount); err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func Deploy(namespace string, client clientset.Interface, apiExtensionsClient *a
 }
 
 func newMySQLClusterCRD() *v1beta1.CustomResourceDefinition {
-	return InitCustomResourceDefinition(
+	return tool.InitCustomResourceDefinition(
 		MYSQLCLUSTERNAME,
 		"Cluster",
 		"mysqlcluster",
@@ -185,7 +185,7 @@ func newMySQLClusterCRD() *v1beta1.CustomResourceDefinition {
 }
 
 func newMySQLBackupCRD() *v1beta1.CustomResourceDefinition {
-	return InitCustomResourceDefinition(
+	return tool.InitCustomResourceDefinition(
 		MYSQLBACKUPNAME,
 		"Backup",
 		"mysqlbackup",
@@ -195,7 +195,7 @@ func newMySQLBackupCRD() *v1beta1.CustomResourceDefinition {
 }
 
 func newMySQLRestoreCRD() *v1beta1.CustomResourceDefinition {
-	return InitCustomResourceDefinition(
+	return tool.InitCustomResourceDefinition(
 		MYSQLRESTORENAME,
 		"Restore",
 		"mysqlrestore",
@@ -205,7 +205,7 @@ func newMySQLRestoreCRD() *v1beta1.CustomResourceDefinition {
 }
 
 func newMySQLBackupScheduleCRD() *v1beta1.CustomResourceDefinition {
-	return InitCustomResourceDefinition(
+	return tool.InitCustomResourceDefinition(
 		MYSQLBACKUPSCHEDULENAME,
 		"BackupSchedule",
 		"mysqlbackupschedule",
@@ -290,15 +290,15 @@ func newMySQLAgentClusterRole() *rbacv1.ClusterRole {
 }
 
 func newMySQLOperatorClusterRoleBinding(namespace string) *rbacv1.ClusterRoleBinding {
-	return InitClusterRoleBinding(SUBJECTKIND, ROLEREF, MYSQLOPERATOR, MYSQLOPERATOR, MYSQLOPERATOR, namespace)
+	return tool.InitClusterRoleBinding(SUBJECTKIND, ROLEREF, MYSQLOPERATOR, MYSQLOPERATOR, MYSQLOPERATOR, namespace)
 }
 
 func newMySQLAgentClusterRoleBinding(namespace string) *rbacv1.ClusterRoleBinding {
-	return InitClusterRoleBinding(SUBJECTKIND, ROLEREF, MYSQLAGENT, MYSQLAGENT, MYSQLAGENT, namespace)
+	return tool.InitClusterRoleBinding(SUBJECTKIND, ROLEREF, MYSQLAGENT, MYSQLAGENT, MYSQLAGENT, namespace)
 }
 
 func newDeployment(namespace string) *appsv1.Deployment {
-	deployment := CreateBasicDeployment(namespace, MYSQLOPERATOR, "app", 1)
+	deployment := tool.CreateBasicDeployment(namespace, MYSQLOPERATOR, "app", 1)
 
 	containers := []corev1.Container{
 		{

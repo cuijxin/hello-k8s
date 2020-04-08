@@ -1,10 +1,9 @@
 package atomservice
 
 import (
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
-
-	. "hello-k8s/pkg/api/v1"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -18,20 +17,20 @@ import (
 // @Accept json
 // @Produce json
 // @param data body atomservice.ScaleAtomServiceRequest true "弹性伸缩Atom自定义服务时所需参数."
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /atomapp/atomservice/scale [post]
 func Scale(c *gin.Context) {
 	log.Info("调用弹性伸缩 Atom 自定义服务的函数.")
 	var r ScaleAtomServiceRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -47,9 +46,9 @@ func Scale(c *gin.Context) {
 
 	result, err := clientset.AppsV1().Deployments(r.Namespace).UpdateScale(r.Name, &scale)
 	if err != nil {
-		SendResponse(c, errno.ErrScaleDeployment, err)
+		tool.SendResponse(c, errno.ErrScaleDeployment, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }

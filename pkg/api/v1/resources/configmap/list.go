@@ -1,7 +1,7 @@
 package configmap
 
 import (
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/configmap"
@@ -16,21 +16,21 @@ import (
 // @Description 获取某一命名空间下的所有 ConfigMap 对象
 // @Tags resource
 // @Param namespace path string true "用户的命名空间"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /resource/configmap/list/{namespace} [get]
 func GetConfigMapList(c *gin.Context) {
 	log.Info("调用获取 ConfigMap 对象列表的函数")
 
 	namespace := c.Param("namespace")
 	if namespace == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -40,9 +40,9 @@ func GetConfigMapList(c *gin.Context) {
 	namespaceQuery := common.NewNamespaceQuery(namespaceMap)
 	list, err := configmap.GetConfigMapList(clientset, namespaceQuery, dsQuery)
 	if err != nil {
-		SendResponse(c, errno.ErrGetConfigMapList, err)
+		tool.SendResponse(c, errno.ErrGetConfigMapList, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, list)
+	tool.SendResponse(c, errno.OK, list)
 }

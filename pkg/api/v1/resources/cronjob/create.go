@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/utils/errno"
 	"reflect"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -21,43 +21,43 @@ import (
 // @Accept json
 // @Produce json
 // @param data body cronjob.CreateCronJobRequest true "创建 CronJob 对象所需参数."
-// @Success 200 {object} handler.Response "{"code":200, "message":"OK", "data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /resource/cronjob/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 Job 对象的函数")
 
 	var r CreateCronJobRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	cronjob := newCronJob(r)
 	result, err := clientset.BatchV1beta1().CronJobs(r.Namespace).Create(cronjob)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateCronJob, err)
+		tool.SendResponse(c, errno.ErrCreateCronJob, err)
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newCronJob(r CreateCronJobRequest) *batch2.CronJob {
-	labels := GetLabelsMap(r.CronJob.CronJobTemplate.PodTemplate.Labels)
+	labels := tool.GetLabelsMap(r.CronJob.CronJobTemplate.PodTemplate.Labels)
 	objectMeta := metav1.ObjectMeta{
 		Name:   r.Name,
 		Labels: labels,
 	}
 
-	podSpec := CreatePodSpec(r.Name, r.CronJob.CronJobTemplate.PodTemplate)
+	podSpec := tool.CreatePodSpec(r.Name, r.CronJob.CronJobTemplate.PodTemplate)
 
 	podTemplate := api.PodTemplateSpec{
 		ObjectMeta: objectMeta,

@@ -4,7 +4,7 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -45,50 +45,50 @@ const (
 // @Accept json
 // @Produce json
 // @param data body redis.CreateOperatorRequest true "安装Redis operator所需参数."
-// @Success 200 {object} handler.Response  "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response  "{"code":0,"message":"OK","data":{""}}"
 // @Router /operator/redisoperator [post]
 func CreateOperator(c *gin.Context) {
 	log.Info("调用安装 Redis Operator 组件的函数.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	var r CreateOperatorRequest
 	if err := c.Bind(&r); err != nil {
-		SendResponse(c, errno.ErrBind, nil)
+		tool.SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
-	sa := NewServiceAccount(RedisOperator)
+	sa := tool.NewServiceAccount(RedisOperator)
 	if _, err := clientset.CoreV1().ServiceAccounts(r.Namespace).Create(sa); err != nil {
-		SendResponse(c, errno.ErrCreateServiceAccount, nil)
+		tool.SendResponse(c, errno.ErrCreateServiceAccount, nil)
 		return
 	}
 
 	clusterRole := newClusterRole()
 	if _, err := clientset.RbacV1().ClusterRoles().Create(clusterRole); err != nil {
-		SendResponse(c, errno.ErrCreateClusterRole, nil)
+		tool.SendResponse(c, errno.ErrCreateClusterRole, nil)
 		return
 	}
 
 	clusterRoleBinding := newClusterRoleBinding(r.Namespace)
 	if _, err := clientset.RbacV1().ClusterRoleBindings().Create(clusterRoleBinding); err != nil {
-		SendResponse(c, errno.ErrCreateClusterRoleBinding, nil)
+		tool.SendResponse(c, errno.ErrCreateClusterRoleBinding, nil)
 		return
 	}
 
 	deployment := newDeployment(r.Namespace, RedisOperator, RedisOperatorImage, RedisOperatorContainerName, RedisOperator)
 	if _, err := clientset.AppsV1().Deployments(r.Namespace).Create(deployment); err != nil {
-		SendResponse(c, errno.ErrCreateDeployment, err)
+		tool.SendResponse(c, errno.ErrCreateDeployment, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 // @Summary 从Kubernetes集群中删除redis operator组件
@@ -97,26 +97,26 @@ func CreateOperator(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param data body redis.DeleteOperatorRequest true "删除Redis Operator组件时所需的参数"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /operator/redisoperator [delete]
 func DeleteOperator(c *gin.Context) {
 	log.Info("调用删除Redis Operator组件的函数.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	apiClientset, err := client.NewApiExtensionsClient()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateApiClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateApiClientSet, nil)
 		return
 	}
 
 	var r DeleteOperatorRequest
 	if err := c.Bind(&r); err != nil {
-		SendResponse(c, errno.ErrBind, nil)
+		tool.SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
@@ -128,7 +128,7 @@ func DeleteOperator(c *gin.Context) {
 
 	apiClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(RedisOperatorCRD, opt)
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 func newClusterRole() *rbacv1.ClusterRole {
@@ -192,7 +192,7 @@ func newClusterRoleBinding(namespace string) *rbacv1.ClusterRoleBinding {
 }
 
 func newDeployment(namespace, redisoperatorName, image, containerName, serviceAccountName string) *appsv1.Deployment {
-	deployment := CreateBasicDeployment(namespace, redisoperatorName, "app", 1)
+	deployment := tool.CreateBasicDeployment(namespace, redisoperatorName, "app", 1)
 
 	rqCPULimit, _ := resource.ParseQuantity("100")
 	rqMemoryLimit, _ := resource.ParseQuantity("50Mi")

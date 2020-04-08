@@ -2,7 +2,7 @@ package container
 
 import (
 	"encoding/json"
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/container"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/logs"
@@ -27,7 +27,7 @@ var upGrader = websocket.Upgrader{
 // @Param namespace path string true "命名空间"
 // @Param podId path string true "PodID"
 // @Param containerId path string true "Container"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /resource/container/logs/{namespace}/{podId}/{containerId} [get]
 func GetLogs(c *gin.Context) {
 	log.Debug("获取某一 Container 对象的 Logs.")
@@ -36,13 +36,13 @@ func GetLogs(c *gin.Context) {
 	podID := c.Param("podId")
 	containerID := c.Param("containerId")
 	if namespace == "" || podID == "" || containerID == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -50,7 +50,7 @@ func GetLogs(c *gin.Context) {
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Errorf(err, "升级 get 请求为 webSocket 协议失败")
-		SendResponse(c, errno.ErrUpGraderRequest, err)
+		tool.SendResponse(c, errno.ErrUpGraderRequest, err)
 		return
 	}
 

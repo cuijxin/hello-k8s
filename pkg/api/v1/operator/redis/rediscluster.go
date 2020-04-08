@@ -6,7 +6,7 @@ import (
 
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -20,39 +20,39 @@ import (
 // @Accept json
 // @Produce json
 // @param data body redis.CreateClusterRequest true "创建RedisFailover集群时所需参数"
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{}}"
 // @Router /cluster/rediscluster [post]
 func CreateCluster(c *gin.Context) {
 	log.Info("调用创建 RedisFailover 集群的函数.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	customClientset, err := client.NewRedisClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateRedisClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateRedisClientSet, nil)
 		return
 	}
 
 	var r CreateClusterRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	redisObj := newRedisFailover(r)
 	result, err := customClientset.DatabasesV1().RedisFailovers(r.Namespace).Create(redisObj)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateRedisFailoverCluster, err)
+		tool.SendResponse(c, errno.ErrCreateRedisFailoverCluster, err)
 		return
 	}
 
-	SendResponse(c, nil, result)
+	tool.SendResponse(c, nil, result)
 }
 
 // @Summary 从Kubernetes集群中删除已经部署的RedisFailover集群.
@@ -61,30 +61,30 @@ func CreateCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param data body redis.DeleteClusterRequest true "删除RedisFailover集群时所需参数"
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{}}"
 // @Router /cluster/rediscluster [delete]
 func DeleteCluster(c *gin.Context) {
 	log.Info("调用删除RedisFailover集群的函数.")
 
 	customClientset, err := client.NewRedisClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateRedisClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateRedisClientSet, nil)
 		return
 	}
 
 	var r DeleteClusterRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	err = customClientset.DatabasesV1().RedisFailovers(r.Namespace).Delete(r.Name, &metav1.DeleteOptions{})
 	if err != nil {
-		SendResponse(c, errno.ErrDeleteRedisFailoverCluster, err)
+		tool.SendResponse(c, errno.ErrDeleteRedisFailoverCluster, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 // @Summary GetCluster get a redis cluster information.
@@ -94,7 +94,7 @@ func DeleteCluster(c *gin.Context) {
 // @Produce json
 // @param name path string true "redis cluster name".
 // @param namespace path string true "namespace".
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/rediscluster/detail/{name}/{namespace} [get]
 func GetCluster(c *gin.Context) {
 	log.Info("Pgsql Cluster get function called.")
@@ -102,23 +102,23 @@ func GetCluster(c *gin.Context) {
 	name := c.Param("name")
 	namespace := c.Param("namespace")
 	if namespace == "" || name == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	customClientset, err := client.NewRedisClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateRedisClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateRedisClientSet, nil)
 		return
 	}
 
 	result, err := customClientset.DatabasesV1().RedisFailovers(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		SendResponse(c, errno.ErrGetRedisFailoverCluster, err)
+		tool.SendResponse(c, errno.ErrGetRedisFailoverCluster, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 // @Summary GetClusterList get the list of the redis cluster.
@@ -127,30 +127,30 @@ func GetCluster(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @param namespace path string true "namespace"
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /cluster/rediscluster/list/{namespace} [get]
 func GetClusterList(c *gin.Context) {
 	log.Info("Pgsql Cluster list function called.")
 
 	namespace := c.Param("namespace")
 	if namespace == "" {
-		SendResponse(c, errno.ErrBadParam, nil)
+		tool.SendResponse(c, errno.ErrBadParam, nil)
 		return
 	}
 
 	customClientset, err := client.NewRedisClientSet()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateRedisClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateRedisClientSet, nil)
 		return
 	}
 
 	result, err := customClientset.DatabasesV1().RedisFailovers(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		SendResponse(c, errno.ErrGetRedisFailoverClusterList, err)
+		tool.SendResponse(c, errno.ErrGetRedisFailoverClusterList, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newRedisFailover(r CreateClusterRequest) *redisfailoverv1.RedisFailover {

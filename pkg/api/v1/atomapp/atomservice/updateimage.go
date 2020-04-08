@@ -4,7 +4,7 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -18,20 +18,20 @@ import (
 // @Accept json
 // @Produce json
 // @param data body atomservice.UpdateAtomServiceImage true "更新Atom自定义服务的镜像时所需参数."
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /atomapp/atomservice/updateimage [post]
 func UpdateImage(c *gin.Context) {
 	log.Info("调用更新 Atom 自定义服务的镜像的函数.")
 	var r UpdateAtomServiceImage
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -48,9 +48,9 @@ func UpdateImage(c *gin.Context) {
 		return updateErr
 	})
 	if retryErr != nil {
-		SendResponse(c, errno.ErrUpdateDeploymentImage, retryErr)
+		tool.SendResponse(c, errno.ErrUpdateDeploymentImage, retryErr)
 		return
 	}
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }

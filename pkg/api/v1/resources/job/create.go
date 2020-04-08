@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/utils/errno"
 	"reflect"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -20,45 +20,45 @@ import (
 // @Accept json
 // @Produce json
 // @param data body job.CreateJobRequest true "创建Job对象所需参数."
-// @Success 200 {object} handler.Response "{"code":200, "message":"OK", "data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /resource/job/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 Job 对象的函数")
 
 	var r CreateJobRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	job := newJob(r)
 	result, err := clientset.BatchV1().Jobs(r.Namespace).Create(job)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateJob, err)
+		tool.SendResponse(c, errno.ErrCreateJob, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newJob(r CreateJobRequest) *batchv1.Job {
 
-	labels := GetLabelsMap(r.Job.PodTemplate.Labels)
+	labels := tool.GetLabelsMap(r.Job.PodTemplate.Labels)
 	objectMeta := metaV1.ObjectMeta{
 		Name:   r.Name,
 		Labels: labels,
 	}
 
-	podSpec := CreatePodSpec(r.Name, r.Job.PodTemplate)
+	podSpec := tool.CreatePodSpec(r.Name, r.Job.PodTemplate)
 
 	podTemplate := api.PodTemplateSpec{
 		ObjectMeta: objectMeta,

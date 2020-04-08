@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -52,44 +52,44 @@ func CreateOperator(c *gin.Context) {
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	var r CreateOpeartorRequest
 	if err := c.Bind(&r); err != nil {
-		SendResponse(c, errno.ErrBind, nil)
+		tool.SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
 	cm := newConfigMap(r.ConfigMapName, r.Namespace)
 	if _, err := clientset.CoreV1().ConfigMaps(r.Namespace).Create(cm); err != nil {
-		SendResponse(c, errno.ErrCreateConfigMap, nil)
+		tool.SendResponse(c, errno.ErrCreateConfigMap, nil)
 		return
 	}
 
 	sa := newServiceAccount(r.ServiceAccountName)
 	if _, err := clientset.CoreV1().ServiceAccounts(r.Namespace).Create(sa); err != nil {
-		SendResponse(c, errno.ErrCreateServiceAccount, nil)
+		tool.SendResponse(c, errno.ErrCreateServiceAccount, nil)
 		return
 	}
 
 	cr := newClusterRole(r.ClusterRoleName)
 	if _, err := clientset.RbacV1().ClusterRoles().Create(cr); err != nil {
-		SendResponse(c, errno.ErrCreateClusterRole, nil)
+		tool.SendResponse(c, errno.ErrCreateClusterRole, nil)
 		return
 	}
 
 	crb := newClusterRoleBinding(r.ClusterRoleBindingName, r.ClusterRoleName, r.ServiceAccountName, r.Namespace)
 	if _, err := clientset.RbacV1().ClusterRoleBindings().Create(crb); err != nil {
-		SendResponse(c, errno.ErrCreateClusterRoleBinding, nil)
+		tool.SendResponse(c, errno.ErrCreateClusterRoleBinding, nil)
 		return
 	}
 
 	deploy := newDeployment(r.Namespace, r.DeploymentName, r.PostgresqlOperatorImage, r.ServiceAccountName)
 	if _, err := clientset.AppsV1().Deployments(r.Namespace).Create(deploy); err != nil {
 		log.Debugf("error: %v", err)
-		SendResponse(c, errno.ErrCreateDeployment, err)
+		tool.SendResponse(c, errno.ErrCreateDeployment, err)
 		return
 	}
 
@@ -102,7 +102,7 @@ func CreateOperator(c *gin.Context) {
 		Namespace:              r.Namespace,
 	}
 
-	SendResponse(c, nil, rsp)
+	tool.SendResponse(c, nil, rsp)
 }
 
 // @Summary DeleteOperator delete pgsqloperator from the kubernetes cluster
@@ -110,14 +110,14 @@ func CreateOperator(c *gin.Context) {
 // @Tags operator
 // @Accept json
 // @Produce json
-// @Success 200 {object} handler.Response "{"code":200,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /operator/pgsqloperator [delete]
 func DeleteOperator(c *gin.Context) {
 	log.Info("Pgsql Operator delete function called.")
 
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
@@ -128,7 +128,7 @@ func DeleteOperator(c *gin.Context) {
 	clientset.RbacV1().ClusterRoles().Delete(DefaultClusterRoleName, opt)
 	clientset.AppsV1().Deployments(DefaultNamespace).Delete(DefaultDeploymentName, opt)
 
-	SendResponse(c, errno.OK, nil)
+	tool.SendResponse(c, errno.OK, nil)
 }
 
 func newConfigMap(configMapName, namespace string) *corev1.ConfigMap {

@@ -2,12 +2,11 @@ package clonecode
 
 import (
 	"fmt"
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"net/url"
 	"strings"
-
-	. "hello-k8s/pkg/api/v1"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -30,34 +29,34 @@ const (
 // @Accept json
 // @Produce json
 // @param data body clonecode.CreateCloneCodeJobRequest true "创建克隆代码的Job时所需参数."
-// @Success 200 {object} handler.Response "{"code":0,"message":"OK","data":{""}}"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /atomapp/clonecode/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建克隆代码Job对象的函数")
 
 	var r CreateCloneCodeJobRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	cloneCodeJob := newCloneCodeJob(r)
 	result, err := clientset.BatchV1().Jobs(r.Namespace).Create(cloneCodeJob)
 	if err != nil {
-		SendResponse(c, errno.ErrCreateCloneCodeJob, err)
+		tool.SendResponse(c, errno.ErrCreateCloneCodeJob, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newCloneCodeJob(r CreateCloneCodeJobRequest) *batchv1.Job {

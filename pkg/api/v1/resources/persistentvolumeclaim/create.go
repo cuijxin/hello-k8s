@@ -5,7 +5,7 @@ import (
 	"hello-k8s/pkg/utils/errno"
 	"strconv"
 
-	. "hello-k8s/pkg/api/v1"
+	"hello-k8s/pkg/api/v1/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -21,34 +21,34 @@ import (
 // @Accept json
 // @Produce json
 // @param data body persistentvolumeclaim.CreatePersistentVolumeClaimRequest true "创建PersistentVolumeClaim对象所需参数."
-// @Success 200 {object} handler.Response "{"code":200, "message":"OK", "data":{""}}"
+// @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /resource/persistentvolumeclaim/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 PersistentVolumeClaim 对象的函数")
 
 	var r CreatePersistentVolumeClaimRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	pvc := newPersistentVolumeClaim(r)
 	result, err := clientset.CoreV1().PersistentVolumeClaims(r.Namespace).Create(pvc)
 	if err != nil {
-		SendResponse(c, errno.ErrCreatePersistentVolumeClaim, err)
+		tool.SendResponse(c, errno.ErrCreatePersistentVolumeClaim, err)
 		return
 	}
 
-	SendResponse(c, errno.OK, result)
+	tool.SendResponse(c, errno.OK, result)
 }
 
 func newPersistentVolumeClaim(r CreatePersistentVolumeClaimRequest) *v1.PersistentVolumeClaim {

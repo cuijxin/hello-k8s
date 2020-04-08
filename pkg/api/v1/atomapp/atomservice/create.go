@@ -1,12 +1,11 @@
 package atomservice
 
 import (
+	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
-
-	. "hello-k8s/pkg/api/v1"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -25,21 +24,21 @@ func Create(c *gin.Context) {
 
 	var r *deployment.AppDeploymentSpec
 	if err := c.BindJSON(r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 
 	// Init kubernetes client
 	clientset, err := client.New()
 	if err != nil {
-		SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
 		return
 	}
 
 	CreateNamespace(r.Namespace, clientset)
 
 	if err := deployment.DeployApp(r, clientset); err != nil {
-		SendResponse(c, errno.ErrDeployAtomService, err)
+		tool.SendResponse(c, errno.ErrDeployAtomService, err)
 		return
 	}
 
@@ -49,5 +48,5 @@ func Create(c *gin.Context) {
 		Service:    r.Name,
 	}
 
-	SendResponse(c, errno.OK, rsp)
+	tool.SendResponse(c, errno.OK, rsp)
 }
