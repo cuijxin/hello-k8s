@@ -815,6 +815,13 @@ definitions:
       message:
         type: string
     type: object
+  user.CreateRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   license: {}
@@ -2089,4 +2096,26 @@ paths:
       summary: 获取所有 StorageClass 对象列表.
       tags:
       - resource
+  /v1/user:
+    post:
+      consumes:
+      - application/json
+      description: 创建 User 对象
+      parameters:
+      - description: 创建 User 对象时所需参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 创建 User 对象
+      tags:
+      - user
 swagger: "2.0"

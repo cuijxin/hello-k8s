@@ -1959,6 +1959,40 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/v1/user": {
+            "post": {
+                "description": "创建 User 对象",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "创建 User 对象",
+                "parameters": [
+                    {
+                        "description": "创建 User 对象时所需参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3099,6 +3133,17 @@ var doc = `{
                     "type": "object"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.CreateRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

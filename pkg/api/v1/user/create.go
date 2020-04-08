@@ -2,7 +2,6 @@ package user
 
 import (
 	model "hello-k8s/pkg/model/user"
-	"hello-k8s/pkg/utils"
 	"hello-k8s/pkg/utils/errno"
 	"hello-k8s/pkg/utils/tool"
 
@@ -11,8 +10,16 @@ import (
 	"github.com/lexkong/log/lager"
 )
 
+// @Summary 创建 User 对象
+// @Description 创建 User 对象
+// @Tags user
+// @Accept json
+// @Produce json
+// @param data body CreateRequest true "创建 User 对象时所需参数"
+// @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
+// @Router /v1/user [post]
 func Create(c *gin.Context) {
-	log.Debug("调用创建用户的接口！", lager.Data{"X-Request-Id": utils.GetReqID(c)})
+	log.Debug("调用创建用户的接口！", lager.Data{"X-Request-Id": tool.GetReqID(c)})
 	var r CreateRequest
 	if err := c.Bind(&r); err != nil {
 		tool.SendResponse(c, errno.ErrBind, nil)

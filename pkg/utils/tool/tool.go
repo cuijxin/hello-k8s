@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
 	"github.com/spf13/viper"
+	"github.com/teris-io/shortid"
+	"github.com/unknwon/com"
 
 	appsv1 "k8s.io/api/apps/v1"
 	api "k8s.io/api/core/v1"
@@ -292,4 +294,28 @@ func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleN
 		}
 	}
 	return nil
+}
+
+func GetPage(c *gin.Context) int {
+	result := 0
+	page, _ := com.StrTo(c.Query("page")).Int()
+	if page > 0 {
+		result = (page - 1) * viper.GetInt("app.page_size")
+	}
+	return result
+}
+
+func GenShortId() (string, error) {
+	return shortid.Generate()
+}
+
+func GetReqID(c *gin.Context) string {
+	v, ok := c.Get("X-Request-Id")
+	if !ok {
+		return ""
+	}
+	if requestId, ok := v.(string); ok {
+		return requestId
+	}
+	return ""
 }
