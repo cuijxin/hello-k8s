@@ -7,9 +7,10 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	pvc "hello-k8s/pkg/kubernetes/kuberesource/resource/persistentvolumeclaim"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
-	. "hello-k8s/pkg/handler"
 )
 
 // @Summary 获取某一用户创建的所有PersistentVolumeClaim对象

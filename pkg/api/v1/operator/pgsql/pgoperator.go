@@ -5,9 +5,10 @@ import (
 	"hello-k8s/pkg/handler/operator"
 	"hello-k8s/pkg/kubernetes/client"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
-	. "hello-k8s/pkg/handler"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"

@@ -5,9 +5,10 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	"reflect"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
-	. "hello-k8s/pkg/handler"
 	batchv1 "k8s.io/api/batch/v1"
 	batch2 "k8s.io/api/batch/v1beta1"
 	api "k8s.io/api/core/v1"

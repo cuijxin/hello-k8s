@@ -1,8 +1,8 @@
 package secret
 
 import (
+	. "hello-k8s/pkg/api/v1"
 	"hello-k8s/pkg/errno"
-	. "hello-k8s/pkg/handler"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"

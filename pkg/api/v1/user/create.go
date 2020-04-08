@@ -3,6 +3,8 @@ package user
 import (
 	"hello-k8s/pkg/errno"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
 )

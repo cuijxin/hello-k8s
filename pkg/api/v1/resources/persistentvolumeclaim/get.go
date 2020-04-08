@@ -5,9 +5,10 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	pvc "hello-k8s/pkg/kubernetes/kuberesource/resource/persistentvolumeclaim"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
-	. "hello-k8s/pkg/handler"
 )
 
 // @Summary  查询某一PersistentVolumeClaim对象的详情

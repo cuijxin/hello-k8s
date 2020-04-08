@@ -7,9 +7,10 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/job"
 
+	. "hello-k8s/pkg/api/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
-	. "hello-k8s/pkg/handler"
 )
 
 // @Summary 获取某一用户创建的所有Job对象

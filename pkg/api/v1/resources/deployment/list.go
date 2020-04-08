@@ -7,7 +7,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
 
-	. "hello-k8s/pkg/handler"
+	. "hello-k8s/pkg/api/v1"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"

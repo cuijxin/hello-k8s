@@ -2,8 +2,8 @@ package configmap
 
 import (
 	"encoding/base64"
+	. "hello-k8s/pkg/api/v1"
 	"hello-k8s/pkg/errno"
-	. "hello-k8s/pkg/handler"
 	"hello-k8s/pkg/kubernetes/client"
 
 	"github.com/gin-gonic/gin"

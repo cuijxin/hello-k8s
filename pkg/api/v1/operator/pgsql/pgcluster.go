@@ -4,7 +4,7 @@ import (
 	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
 
-	. "hello-k8s/pkg/handler"
+	. "hello-k8s/pkg/api/v1"
 
 	acidv1 "github.com/cuijxin/postgres-operator-atom/pkg/apis/acid.zalan.do/v1"
 	"github.com/gin-gonic/gin"
