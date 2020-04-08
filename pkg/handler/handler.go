@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/handler/resources/common"
 	deploy "hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
+	"hello-k8s/pkg/utils/errno"
 	"net/http"
 	"path"
 	"strconv"

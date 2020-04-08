@@ -2,8 +2,8 @@ package clonecode
 
 import (
 	"fmt"
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
+	"hello-k8s/pkg/utils/errno"
 	"net/url"
 	"strings"
 

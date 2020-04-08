@@ -6,6 +6,15 @@ var (
 	InternalServerError = &Errno{Code: 100001, Message: "Internal server error"}
 	ErrBind             = &Errno{Code: 100002, Message: "Error occurred while binding the request body to the struct."}
 	ErrBadParam         = &Errno{Code: 100003, Message: "Bad Parameters."}
+	ErrValidation       = &Errno{Code: 100004, Message: "Validation failed."}
+	ErrDatabase         = &Errno{Code: 100005, Message: "Database error."}
+	ErrToken            = &Errno{Code: 100006, Message: "Error occurred while signing the JSON web token."}
+
+	// user errors
+	ErrEncrypt           = &Errno{Code: 100101, Message: "加密用户密码时发生错误！"}
+	ErrUserNotFound      = &Errno{Code: 100102, Message: "The user was not found."}
+	ErrTokenInvalid      = &Errno{Code: 100103, Message: "Token 无效！"}
+	ErrPasswordIncorrect = &Errno{Code: 100104, Message: "用户密码无效！"}
 
 	ErrBadK8sConfig         = &Errno{Code: 200001, Message: "Kubernetes config err."}
 	ErrCreateK8sClientSet   = &Errno{Code: 200002, Message: "Kubernete clientset init err."}
@@ -15,7 +24,6 @@ var (
 	ErrCreateMySQLClientSet = &Errno{Code: 200006, Message: "创建MySQL Clientset 对象失败！"}
 	ErrUpGraderRequest      = &Errno{Code: 200020, Message: "升级get请求为websocket协议失败."}
 
-	// user errors
 	ErrCreateServiceAccount     = &Errno{Code: 200102, Message: "Create serviceaccount failed."}
 	ErrCreateClusterRole        = &Errno{Code: 200103, Message: "Create clustrrole failed."}
 	ErrCreateClusterRoleBinding = &Errno{Code: 200104, Message: "Crate clusterrolebinding failed."}

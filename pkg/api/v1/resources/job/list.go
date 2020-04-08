@@ -1,11 +1,11 @@
 package job
 
 import (
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/job"
+	"hello-k8s/pkg/utils/errno"
 
 	. "hello-k8s/pkg/api/v1"
 

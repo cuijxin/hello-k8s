@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
+	"hello-k8s/pkg/utils/errno"
 
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 

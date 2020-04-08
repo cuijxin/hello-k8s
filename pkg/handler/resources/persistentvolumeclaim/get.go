@@ -1,9 +1,9 @@
 package persistentvolumeclaim
 
 import (
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
 	pvc "hello-k8s/pkg/kubernetes/kuberesource/resource/persistentvolumeclaim"
+	"hello-k8s/pkg/utils/errno"
 
 	. "hello-k8s/pkg/api/v1"
 

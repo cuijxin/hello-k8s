@@ -1,7 +1,7 @@
 package user
 
 import (
-	"hello-k8s/pkg/errno"
+	"hello-k8s/pkg/utils/errno"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"

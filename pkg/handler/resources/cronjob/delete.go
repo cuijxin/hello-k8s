@@ -2,8 +2,8 @@ package cronjob
 
 import (
 	. "hello-k8s/pkg/api/v1"
-	"hello-k8s/pkg/errno"
 	"hello-k8s/pkg/kubernetes/client"
+	"hello-k8s/pkg/utils/errno"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"

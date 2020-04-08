@@ -19,6 +19,7 @@ import (
 	"hello-k8s/pkg/api/v1/resources/service"
 	"hello-k8s/pkg/api/v1/resources/storageclass"
 	"hello-k8s/pkg/api/v1/sd"
+	"hello-k8s/pkg/api/v1/user"
 	"hello-k8s/pkg/router/middleware"
 	"net/http"
 
