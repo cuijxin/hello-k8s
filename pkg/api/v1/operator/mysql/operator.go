@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
+	"hello-k8s/pkg/utils/tool"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

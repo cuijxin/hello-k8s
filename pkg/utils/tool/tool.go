@@ -1,8 +1,8 @@
 package tool
 
 import (
-	"hello-k8s/pkg/handler/resources/common"
 	deploy "hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
+	"hello-k8s/pkg/model"
 	"hello-k8s/pkg/utils/errno"
 	"net/http"
 	"path"
@@ -94,7 +94,7 @@ func CreateBasicDeployment(namespace, name, labelKey string, replicas int32) *ap
 	}
 }
 
-func CreatePodSpec(name string, podSpecArgs common.PodArgs) *corev1.PodSpec {
+func CreatePodSpec(name string, podSpecArgs model.PodArgs) *corev1.PodSpec {
 	containerSpec := corev1.Container{
 		Name:  name,
 		Image: podSpecArgs.ContainerImage,

@@ -4,7 +4,7 @@ import (
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
-	"hello-k8s/pkg/api/v1/tool"
+	"hello-k8s/pkg/utils/tool"
 
 	acidv1 "github.com/cuijxin/postgres-operator-atom/pkg/apis/acid.zalan.do/v1"
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func CreateCluster(c *gin.Context) {
 
 	var r CreateClusterRequest
 	if err := c.BindJSON(&r); err != nil {
-		SendResponse(c, errno.ErrBind, err)
+		tool.SendResponse(c, errno.ErrBind, err)
 		return
 	}
 

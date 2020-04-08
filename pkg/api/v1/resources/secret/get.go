@@ -1,10 +1,10 @@
 package secret
 
 import (
-	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/secret"
 	"hello-k8s/pkg/utils/errno"
+	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"

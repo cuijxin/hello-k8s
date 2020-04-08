@@ -28,7 +28,7 @@ func (u *UserModel) Create() error {
 // DeleteUser deletes the user by the user identifier.
 func DeleteUser(id uint64) error {
 	user := UserModel{}
-	user.BaseModel.Id = id
+	user.BaseModel.ID = id
 	return model.DB.Self.Delete(&user).Error
 }
 
@@ -54,11 +54,11 @@ func ListUser(username string, offset, limit int) ([]*UserModel, uint64, error) 
 	var count uint64
 
 	where := fmt.Sprintf("username like '%%%s%%'", username)
-	if err := DB.Self.Model(&UserModel{}).Where(where).Count(&count).Error; err != nil {
+	if err := model.DB.Self.Model(&UserModel{}).Where(where).Count(&count).Error; err != nil {
 		return users, count, err
 	}
 
-	if err := DB.Self.Where(where).Offset(offset).Limit(limit).Order("id desc").Find(&users).Error; err != nil {
+	if err := model.DB.Self.Where(where).Offset(offset).Limit(limit).Order("id desc").Find(&users).Error; err != nil {
 		return users, count, err
 	}
 

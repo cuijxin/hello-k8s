@@ -6,7 +6,7 @@ import (
 
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 
-	"hello-k8s/pkg/api/v1/tool"
+	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"

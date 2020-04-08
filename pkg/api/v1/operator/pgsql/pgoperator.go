@@ -1,11 +1,10 @@
 package pgsql
 
 import (
-	"hello-k8s/pkg/handler/operator"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
-	"hello-k8s/pkg/api/v1/tool"
+	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -320,7 +319,7 @@ func newClusterRoleBinding(clusterRoleBingName, clusterRoleName, serviceAccountN
 
 func newDeployment(namespace, deploymentName, image, serviceAccountName string) *appsv1.Deployment {
 	// log.Debug("init deployment basic object.")
-	deployment := operator.CreateBasicDeployment(namespace, deploymentName, "name", 1)
+	deployment := tool.CreateBasicDeployment(namespace, deploymentName, "name", 1)
 	// log.Debug("init deployment basic object done.")
 	runAsUser := int64(1000)
 	runAsNonRoot := true

@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
+	"hello-k8s/pkg/utils/tool"
 	"reflect"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,7 +49,7 @@ func CreateCluster(c *gin.Context) {
 
 	tool.CreateNamespace(r.Namespace, clientset)
 
-	err = CheckMySQLClusterRBAC(
+	err = tool.CheckMySQLClusterRBAC(
 		r.Namespace,
 		defaultAgentServiceAccoutName,
 		defaultRoleName,

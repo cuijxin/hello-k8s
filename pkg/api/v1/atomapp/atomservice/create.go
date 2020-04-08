@@ -1,9 +1,9 @@
 package atomservice
 
 import (
-	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
+	"hello-k8s/pkg/utils/tool"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
 
@@ -35,7 +35,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	CreateNamespace(r.Namespace, clientset)
+	tool.CreateNamespace(r.Namespace, clientset)
 
 	if err := deployment.DeployApp(r, clientset); err != nil {
 		tool.SendResponse(c, errno.ErrDeployAtomService, err)

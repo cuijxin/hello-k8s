@@ -2,9 +2,9 @@ package configmap
 
 import (
 	"encoding/base64"
-	"hello-k8s/pkg/api/v1/tool"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
+	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
@@ -61,7 +61,7 @@ func newConfigMap(r CreateConfigMapRequest) *v1.ConfigMap {
 		tmp := make(map[string]string)
 		for _, item := range r.ConfigMapItems {
 			d, _ := base64.StdEncoding.DecodeString(item.Value)
-			str := String(d)
+			str := tool.String(d)
 			tmp[item.Key] = str
 		}
 		configmap.Data = tmp
