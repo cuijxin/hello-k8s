@@ -51,6 +51,11 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 	// swagger api docs
 	g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	u := g.Group("/v1/user")
+	{
+		u.POST("", user.Create)
+	}
+
 	o := g.Group("/operator")
 	{
 		o.POST("/pgsqloperator", pgsql.CreateOperator)
