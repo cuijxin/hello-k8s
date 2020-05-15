@@ -15,11 +15,14 @@
 package deployment
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/replicaset"
+
 	apps "k8s.io/api/apps/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
@@ -34,7 +37,7 @@ func GetDeploymentOldReplicaSets(client client.Interface, dsQuery *dataselect.Da
 		ListMeta:    api.ListMeta{TotalItems: 0},
 	}
 
-	deployment, err := client.AppsV1().Deployments(namespace).Get(deploymentName, metaV1.GetOptions{})
+	deployment, err := client.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metaV1.GetOptions{})
 	if err != nil {
 		return oldReplicaSetList, err
 	}

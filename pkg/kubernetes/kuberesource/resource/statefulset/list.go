@@ -23,12 +23,13 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-// StatefulSetListComponent contains a list of Stateful Sets in the cluster.
+// StatefulSetList contains a list of Stateful Sets in the cluster.
 type StatefulSetList struct {
 	ListMeta api.ListMeta `json:"listMeta"`
 

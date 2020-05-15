@@ -15,16 +15,12 @@
 package deployment
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
-	"path"
-	"strconv"
 	"strings"
 
-	"hello-k8s/pkg/kubernetes/kuberesource/errors"
-
-	"github.com/spf13/viper"
 	apps "k8s.io/api/apps/v1"
 	api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -38,6 +34,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	client "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+
+	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 )
 
 const (
@@ -73,17 +71,8 @@ type AppDeploymentSpec struct {
 	// List of user-defined environment variables.
 	Variables []EnvironmentVariable `json:"variables"`
 
-	// List of user-defined configmap variables.
-	ConfigMaps []ConfigVariable `json:"configmaps"`
-
-	// List of user-defined PersistentVolumeClaim variables.
-	PersistentVolumeClaims []PersistentVolumeClaimVariable `json:"pvcs"`
-
 	// Whether the created service is external.
 	IsExternal bool `json:"isExternal"`
-
-	// Whether the created service is Loadbalancer type
-	IsLoadBalancer bool `json:"isLoadBalancer"`
 
 	// Description of the deployment.
 	Description *string `json:"description"`
@@ -91,23 +80,41 @@ type AppDeploymentSpec struct {
 	// Target namespace of the application.
 	Namespace string `json:"namespace"`
 
-	// // Optional memory requirement for the container.
-	// MemoryRequirement *resource.Quantity `json:"memoryRequirement"`
-	//
-	// // Optional CPU requirement for the container.
-	// CpuRequirement *resource.Quantity `json:"cpuRequirement"`
-
 	// Optional memory requirement for the container.
-	MemoryRequirement float64 `json:"memoryRequirement"`
+	MemoryRequirement *resource.Quantity `json:"memoryRequirement"`
 
 	// Optional CPU requirement for the container.
-	CpuRequirement float64 `json:"cpuRequirement"`
+	CpuRequirement *resource.Quantity `json:"cpuRequirement"`
 
 	// Labels that will be defined on Pods/RCs/Services
 	Labels []Label `json:"labels"`
 
 	// Whether to run the container as privileged user (essentially equivalent to root on the host).
 	RunAsPrivileged bool `json:"runAsPrivileged"`
+}
+
+// ConfigVariable 代表一个服务运行时所需的配置文件参数
+type ConfigVariable struct {
+	// Name 一个ConfigMap对象的名称，必须是与应用同命名空间下的一个可用ConfigMap对象的名称.
+	Name string `json:"name"`
+
+	// MountPath 配置文件挂载路径，代表这个服务如果想要成功运行，需要到那个路径下去获取这个配置文件.
+	MountPath string `json:"mountPath"`
+
+	// ReadOnly
+	ReadOnly bool `json:"readOnly"`
+}
+
+// PersistentVolumeClaimVariable 代表一个服务运行时需要的持久化存储参数.
+type PersistentVolumeClaimVariable struct {
+	// Name 一个 PersistentVolumeClaim 对象的名称，必须是与应用同命名空间下的一个可用 PersistentVolumeClaim 对象的名称.
+	Name string `json:"name"`
+
+	// MountPath 持久化存储挂载路径.
+	MountPath string `json:"mountPath"`
+
+	// ReadOnly
+	ReadOnly bool `json:"readOnly"`
 }
 
 // AppDeploymentFromFileSpec is a specification for deployment from file
@@ -147,30 +154,6 @@ type PortMapping struct {
 
 	// IP protocol for the mapping, e.g., "TCP" or "UDP".
 	Protocol api.Protocol `json:"protocol"`
-}
-
-// ConfigVariable 代表一个服务运行时所需的配置文件参数
-type ConfigVariable struct {
-	// Name 一个ConfigMap对象的名称，必须是与应用同命名空间下的一个可用ConfigMap对象的名称.
-	Name string `json:"name"`
-
-	// MountPath 配置文件挂载路径，代表这个服务如果想要成功运行，需要到那个路径下去获取这个配置文件.
-	MountPath string `json:"mountPath"`
-
-	// ReadOnly
-	ReadOnly bool `json:"readOnly"`
-}
-
-// PersistentVolumeClaimVariable 代表一个服务运行时需要的持久化存储参数.
-type PersistentVolumeClaimVariable struct {
-	// Name 一个 PersistentVolumeClaim 对象的名称，必须是与应用同命名空间下的一个可用 PersistentVolumeClaim 对象的名称.
-	Name string `json:"name"`
-
-	// MountPath 持久化存储挂载路径.
-	MountPath string `json:"mountPath"`
-
-	// ReadOnly
-	ReadOnly bool `json:"readOnly"`
 }
 
 // EnvironmentVariable represents a named variable accessible for containers.
@@ -226,30 +209,6 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 		Env: convertEnvVarsSpec(spec.Variables),
 	}
 
-	if len(spec.ConfigMaps) > 0 {
-		for _, configMapObj := range spec.ConfigMaps {
-			configFileName := path.Base(configMapObj.MountPath)
-			volumeMount := api.VolumeMount{
-				Name:      configMapObj.Name,
-				MountPath: configMapObj.MountPath,
-				SubPath:   configFileName,
-				ReadOnly:  configMapObj.ReadOnly,
-			}
-			containerSpec.VolumeMounts = append(containerSpec.VolumeMounts, volumeMount)
-		}
-	}
-
-	if len(spec.PersistentVolumeClaims) > 0 {
-		for _, pvc := range spec.PersistentVolumeClaims {
-			volumeMount := api.VolumeMount{
-				Name:      pvc.Name,
-				MountPath: pvc.MountPath,
-				ReadOnly:  pvc.ReadOnly,
-			}
-			containerSpec.VolumeMounts = append(containerSpec.VolumeMounts, volumeMount)
-		}
-	}
-
 	if spec.ContainerCommand != nil {
 		containerSpec.Command = []string{*spec.ContainerCommand}
 	}
@@ -257,61 +216,17 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 		containerSpec.Args = []string{*spec.ContainerCommandArgs}
 	}
 
-	// if spec.CpuRequirement != nil {
-	// 	containerSpec.Resources.Requests[api.ResourceCPU] = *spec.CpuRequirement
-	// }
-	// if spec.MemoryRequirement != nil {
-	// 	containerSpec.Resources.Requests[api.ResourceMemory] = *spec.MemoryRequirement
-	// }
-
-	if spec.CpuRequirement > 0 {
-		capacity := strconv.FormatFloat(spec.CpuRequirement, 'f', 5, 32)
-		request, _ := resource.ParseQuantity(capacity)
-		containerSpec.Resources.Requests[api.ResourceCPU] = request
+	if spec.CpuRequirement != nil {
+		containerSpec.Resources.Requests[api.ResourceCPU] = *spec.CpuRequirement
 	}
-	if spec.MemoryRequirement > 0 {
-		in := strconv.FormatFloat(spec.MemoryRequirement, 'f', 5, 32)
-		capacity := in + viper.GetString("constants.storage_unit")
-		request, _ := resource.ParseQuantity(capacity)
-		containerSpec.Resources.Requests[api.ResourceMemory] = request
+	if spec.MemoryRequirement != nil {
+		containerSpec.Resources.Requests[api.ResourceMemory] = *spec.MemoryRequirement
 	}
-
 	podSpec := api.PodSpec{
 		Containers: []api.Container{containerSpec},
 	}
 	if spec.ImagePullSecret != nil {
 		podSpec.ImagePullSecrets = []api.LocalObjectReference{{Name: *spec.ImagePullSecret}}
-	}
-
-	if len(spec.ConfigMaps) > 0 {
-		for _, configMapObj := range spec.ConfigMaps {
-			configmap := api.ConfigMapVolumeSource{
-				LocalObjectReference: api.LocalObjectReference{
-					Name: configMapObj.Name,
-				},
-			}
-			volume := api.Volume{
-				Name: configMapObj.Name,
-				VolumeSource: api.VolumeSource{
-					ConfigMap: &configmap,
-				},
-			}
-			podSpec.Volumes = append(podSpec.Volumes, volume)
-		}
-	}
-
-	if len(spec.PersistentVolumeClaims) > 0 {
-		for _, pvc := range spec.PersistentVolumeClaims {
-			volume := api.Volume{
-				Name: pvc.Name,
-				VolumeSource: api.VolumeSource{
-					PersistentVolumeClaim: &api.PersistentVolumeClaimVolumeSource{
-						ClaimName: pvc.Name,
-					},
-				},
-			}
-			podSpec.Volumes = append(podSpec.Volumes, volume)
-		}
 	}
 
 	podTemplate := api.PodTemplateSpec{
@@ -325,15 +240,11 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 			Replicas: &spec.Replicas,
 			Template: podTemplate,
 			Selector: &metaV1.LabelSelector{
-				// Quoting from https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#selector:
-				// In API version apps/v1beta2, .spec.selector and .metadata.labels no longer default to
-				// .spec.template.metadata.labels if not set. So they must be set explicitly.
-				// Also note that .spec.selector is immutable after creation of the Deployment in apps/v1beta2.
 				MatchLabels: labels,
 			},
 		},
 	}
-	_, err := client.AppsV1().Deployments(spec.Namespace).Create(deployment)
+	_, err := client.AppsV1().Deployments(spec.Namespace).Create(context.TODO(), deployment, metaV1.CreateOptions{})
 
 	if err != nil {
 		return err
@@ -348,11 +259,7 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 		}
 
 		if spec.IsExternal {
-			if spec.IsLoadBalancer {
-				service.Spec.Type = api.ServiceTypeLoadBalancer
-			} else {
-				service.Spec.Type = api.ServiceTypeNodePort
-			}
+			service.Spec.Type = api.ServiceTypeLoadBalancer
 		} else {
 			service.Spec.Type = api.ServiceTypeClusterIP
 		}
@@ -371,7 +278,7 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 			service.Spec.Ports = append(service.Spec.Ports, servicePort)
 		}
 
-		_, err = client.CoreV1().Services(spec.Namespace).Create(service)
+		_, err = client.CoreV1().Services(spec.Namespace).Create(context.TODO(), service, metaV1.CreateOptions{})
 		return err
 	}
 
@@ -423,8 +330,8 @@ func DeployAppFromFile(cfg *rest.Config, spec *AppDeploymentFromFileSpec) (bool,
 	log.Printf("Namespace for deploy from file: %s\n", spec.Namespace)
 	d := yaml.NewYAMLOrJSONDecoder(reader, 4096)
 	for {
-		data := unstructured.Unstructured{}
-		if err := d.Decode(&data); err != nil {
+		data := &unstructured.Unstructured{}
+		if err := d.Decode(data); err != nil {
 			if err == io.EOF {
 				return true, nil
 			}
@@ -466,11 +373,16 @@ func DeployAppFromFile(cfg *rest.Config, spec *AppDeploymentFromFileSpec) (bool,
 		}
 
 		groupVersionResource := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
+		namespace := spec.Namespace
 
 		if strings.Compare(spec.Namespace, "_all") == 0 {
-			_, err = dynamicClient.Resource(groupVersionResource).Namespace(data.GetNamespace()).Create(&data, metaV1.CreateOptions{})
+			namespace = data.GetNamespace()
+		}
+
+		if resource.Namespaced {
+			_, err = dynamicClient.Resource(groupVersionResource).Namespace(namespace).Create(context.TODO(), data, metaV1.CreateOptions{})
 		} else {
-			_, err = dynamicClient.Resource(groupVersionResource).Namespace(spec.Namespace).Create(&data, metaV1.CreateOptions{})
+			_, err = dynamicClient.Resource(groupVersionResource).Create(context.TODO(), data, metaV1.CreateOptions{})
 		}
 
 		if err != nil {

@@ -23,12 +23,13 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	batch "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	client "k8s.io/client-go/kubernetes"
 )
 
-// JobListComponent contains a list of Jobs in the cluster.
+// JobList contains a list of Jobs in the cluster.
 type JobList struct {
 	ListMeta          api.ListMeta       `json:"listMeta"`
 	CumulativeMetrics []metricapi.Metric `json:"cumulativeMetrics"`
@@ -46,11 +47,11 @@ type JobList struct {
 type JobStatusType string
 
 const (
-	// JobRunning means the job is still running.
+	// JobStatusRunning means the job is still running.
 	JobStatusRunning JobStatusType = "Running"
-	// JobComplete means the job has completed its execution.
+	// JobStatusComplete means the job has completed its execution.
 	JobStatusComplete JobStatusType = "Complete"
-	// JobFailed means the job has failed its execution.
+	// JobStatusFailed means the job has failed its execution.
 	JobStatusFailed JobStatusType = "Failed"
 )
 

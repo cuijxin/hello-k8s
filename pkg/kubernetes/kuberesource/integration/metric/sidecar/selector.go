@@ -17,9 +17,10 @@ package sidecar
 import (
 	"fmt"
 
-	"github.com/emicklei/go-restful/log"
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
+
+	"github.com/emicklei/go-restful/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -63,10 +64,9 @@ func getSidecarSelector(selector metricapi.ResourceSelector,
 		}
 		return newSidecarSelectorFromNativeResource(api.ResourceKindPod,
 			selector.Namespace, podListToNameList(myPods), podListToUIDList(myPods))
-	} else {
-		// currently can only convert derived resource to pods. You can change it by implementing other methods
-		return sidecarSelector{}, fmt.Errorf(`Internal Error: Requested summing resources not supported. Requested "%s"`, summingResource)
 	}
+	// currently can only convert derived resource to pods. You can change it by implementing other methods
+	return sidecarSelector{}, fmt.Errorf(`Internal Error: Requested summing resources not supported. Requested "%s"`, summingResource)
 }
 
 // getMyPodsFromCache returns a full list of pods that belong to this resource.

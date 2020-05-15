@@ -23,11 +23,12 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	v1 "k8s.io/api/core/v1"
 	client "k8s.io/client-go/kubernetes"
 )
 
-// ReplicationControllerListComponent contains a list of Replication Controllers in the cluster.
+// ReplicationControllerList contains a list of Replication Controllers in the cluster.
 type ReplicationControllerList struct {
 	ListMeta          api.ListMeta       `json:"listMeta"`
 	CumulativeMetrics []metricapi.Metric `json:"cumulativeMetrics"`

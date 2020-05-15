@@ -21,6 +21,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	v1 "k8s.io/api/core/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -41,7 +42,7 @@ type Service struct {
 	// Label selector of the service.
 	Selector map[string]string `json:"selector"`
 
-	// Type determines how the service will be exposed.  Valid options: ClusterIP, NodePort, LoadBalancer
+	// Type determines how the service will be exposed.  Valid options: ClusterIP, NodePort, LoadBalancer, ExternalName
 	Type v1.ServiceType `json:"type"`
 
 	// ClusterIP is usually assigned by the master. Valid values are None, empty string (""), or
@@ -49,7 +50,7 @@ type Service struct {
 	ClusterIP string `json:"clusterIP"`
 }
 
-// ServiceListComponent contains a list of services in the cluster.
+// ServiceList contains a list of services in the cluster.
 type ServiceList struct {
 	ListMeta api.ListMeta `json:"listMeta"`
 

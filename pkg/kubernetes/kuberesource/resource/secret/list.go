@@ -15,12 +15,14 @@
 package secret
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -70,7 +72,7 @@ type Secret struct {
 	Type       v1.SecretType  `json:"type"`
 }
 
-// SecretsList is a response structure for a queried secrets list.
+// SecretList is a response structure for a queried secrets list.
 type SecretList struct {
 	api.ListMeta `json:"listMeta"`
 
@@ -85,7 +87,7 @@ type SecretList struct {
 func GetSecretList(client kubernetes.Interface, namespace *common.NamespaceQuery,
 	dsQuery *dataselect.DataSelectQuery) (*SecretList, error) {
 	log.Printf("Getting list of secrets in %s namespace\n", namespace)
-	secretList, err := client.CoreV1().Secrets(namespace.ToRequestParam()).List(api.ListEverything)
+	secretList, err := client.CoreV1().Secrets(namespace.ToRequestParam()).List(context.TODO(), api.ListEverything)
 
 	nonCriticalErrors, criticalError := errors.HandleError(err)
 	if criticalError != nil {
@@ -106,7 +108,7 @@ func CreateSecret(client kubernetes.Interface, spec SecretSpec) (*Secret, error)
 		Type: spec.GetType(),
 		Data: spec.GetData(),
 	}
-	_, err := client.CoreV1().Secrets(namespace).Create(secret)
+	_, err := client.CoreV1().Secrets(namespace).Create(context.TODO(), secret, metaV1.CreateOptions{})
 	result := toSecret(secret)
 	return &result, err
 }

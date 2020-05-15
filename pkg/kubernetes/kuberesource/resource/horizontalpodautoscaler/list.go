@@ -15,10 +15,13 @@
 package horizontalpodautoscaler
 
 import (
+	"strings"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	autoscaling "k8s.io/api/autoscaling/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
 )
@@ -70,7 +73,7 @@ func GetHorizontalPodAutoscalerListForResource(client k8sClient.Interface, names
 
 	filteredHpaList := make([]autoscaling.HorizontalPodAutoscaler, 0)
 	for _, hpa := range hpaList.Items {
-		if hpa.Spec.ScaleTargetRef.Kind == kind && hpa.Spec.ScaleTargetRef.Name == name {
+		if strings.ToLower(hpa.Spec.ScaleTargetRef.Kind) == kind && hpa.Spec.ScaleTargetRef.Name == name {
 			filteredHpaList = append(filteredHpaList, hpa)
 		}
 	}

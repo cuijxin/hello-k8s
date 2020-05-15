@@ -15,12 +15,15 @@
 package service
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
@@ -35,7 +38,7 @@ func GetServicePods(client k8sClient.Interface, metricClient metricapi.MetricCli
 		CumulativeMetrics: []metricapi.Metric{},
 	}
 
-	service, err := client.CoreV1().Services(namespace).Get(name, metaV1.GetOptions{})
+	service, err := client.CoreV1().Services(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return &podList, err
 	}

@@ -21,12 +21,13 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-// DaemonSetListComponent contains a list of Daemon Sets in the cluster.
+// DaemonSetList contains a list of Daemon Sets in the cluster.
 type DaemonSetList struct {
 	ListMeta          api.ListMeta          `json:"listMeta"`
 	DaemonSets        []DaemonSet           `json:"daemonSets"`

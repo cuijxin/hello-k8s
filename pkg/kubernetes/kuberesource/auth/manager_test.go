@@ -27,6 +27,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 
 	pluginclientset "hello-k8s/pkg/kubernetes/kuberesource/plugin/client/clientset/versioned"
+
 	v1 "k8s.io/api/authorization/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -64,6 +65,10 @@ func (self *fakeClientManager) InsecureAPIExtensionsClient() apiextensionsclient
 	return nil
 }
 
+func (self *fakeClientManager) InsecurePluginClient() pluginclientset.Interface {
+	return nil
+}
+
 func (self *fakeClientManager) SetTokenManager(manager authApi.TokenManager) {}
 
 func (self *fakeClientManager) Config(req *restful.Request) (*rest.Config, error) {
@@ -83,8 +88,7 @@ func (self *fakeClientManager) HasAccess(authInfo api.AuthInfo) error {
 }
 
 func (self *fakeClientManager) VerberClient(req *restful.Request, config *rest.Config) (clientapi.ResourceVerber, error) {
-	return client.NewResourceVerber(nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil), nil
+	return client.NewResourceVerber(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), nil
 }
 
 func (self *fakeClientManager) CanI(req *restful.Request, ssar *v1.SelfSubjectAccessReview) bool {

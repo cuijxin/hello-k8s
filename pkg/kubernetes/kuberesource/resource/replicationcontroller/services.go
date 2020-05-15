@@ -15,10 +15,13 @@
 package replicationcontroller
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/service"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -28,7 +31,7 @@ import (
 func GetReplicationControllerServices(client client.Interface, dsQuery *dataselect.DataSelectQuery,
 	namespace, rcName string) (*service.ServiceList, error) {
 
-	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(rcName, metaV1.GetOptions{})
+	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(context.TODO(), rcName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

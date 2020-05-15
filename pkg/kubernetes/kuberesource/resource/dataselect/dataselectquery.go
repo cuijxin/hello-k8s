@@ -18,7 +18,7 @@ import (
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 )
 
-// Options for GenericDataSelect which takes []GenericDataCell and returns selected data.
+// DataSelectQuery is options for GenericDataSelect which takes []GenericDataCell and returns selected data.
 // Can be extended to include any kind of selection - for example filtering.
 // Currently included only Pagination and Sort options.
 type DataSelectQuery struct {

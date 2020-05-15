@@ -16,10 +16,11 @@ package horizontalpodautoscaler
 
 import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	autoscaling "k8s.io/api/autoscaling/v1"
 )
 
-// Simple mapping of an autoscaling.CrossVersionObjectReference
+// ScaleTargetRef is a simple mapping of an autoscaling.CrossVersionObjectReference
 type ScaleTargetRef struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`

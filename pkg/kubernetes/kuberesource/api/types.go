@@ -75,6 +75,9 @@ type TypeMeta struct {
 	// In smalllettercase.
 	// More info: http://releases.k8s.io/HEAD/docs/devel/api-conventions.md#types-kinds
 	Kind ResourceKind `json:"kind,omitempty"`
+
+	// Scalable represents whether or not an object is scalable.
+	Scalable bool `json:"scalable,omitempty"`
 }
 
 // ListMeta describes list of objects, i.e. holds information about pagination options set for the list.
@@ -99,7 +102,8 @@ func NewObjectMeta(k8SObjectMeta metaV1.ObjectMeta) ObjectMeta {
 // NewTypeMeta creates new type mete for the resource kind.
 func NewTypeMeta(kind ResourceKind) TypeMeta {
 	return TypeMeta{
-		Kind: kind,
+		Kind:     kind,
+		Scalable: kind.Scalable(),
 	}
 }
 
@@ -133,8 +137,30 @@ const (
 	ResourceKindStatefulSet              = "statefulset"
 	ResourceKindStorageClass             = "storageclass"
 	ResourceKindClusterRole              = "clusterrole"
+	ResourceKindClusterRoleBinding       = "clusterrolebinding"
+	ResourceKindRole                     = "role"
+	ResourceKindRoleBinding              = "rolebinding"
+	ResourceKindPlugin                   = "plugin"
 	ResourceKindEndpoint                 = "endpoint"
 )
+
+// Scalable method return whether ResourceKind is scalable.
+func (k ResourceKind) Scalable() bool {
+	scalable := []ResourceKind{
+		ResourceKindDeployment,
+		ResourceKindReplicaSet,
+		ResourceKindReplicationController,
+		ResourceKindStatefulSet,
+	}
+
+	for _, kind := range scalable {
+		if k == kind {
+			return true
+		}
+	}
+
+	return false
+}
 
 // ClientType represents type of client that is used to perform generic operations on resources.
 // Different resources belong to different client, i.e. Deployments belongs to extension client
@@ -152,8 +178,10 @@ const (
 	ClientTypeStorageClient       = "storageclient"
 	ClientTypeRbacClient          = "rbacclient"
 	ClientTypeAPIExtensionsClient = "apiextensionsclient"
+	ClientTypePluginsClient       = "plugin"
 )
 
+// APIMapping is the mapping from resource kind to ClientType and Namespaced.
 type APIMapping struct {
 	// Kubernetes resource name.
 	Resource string
@@ -163,13 +191,14 @@ type APIMapping struct {
 	Namespaced bool
 }
 
-// Mapping from resource kind to K8s apiserver API path. This is mostly pluralization, because
-// K8s apiserver uses plural paths and this project singular.
+// KindToAPIMapping is the mapping from resource kind to K8s apiserver API path. This is mostly pluralization, because
+// Kubernetes apiserver uses plural paths and this project singular.
 // Must be kept in sync with the list of supported kinds.
+// See: https://kubernetes.io/docs/reference/
 var KindToAPIMapping = map[string]APIMapping{
 	ResourceKindConfigMap:                {"configmaps", ClientTypeDefault, true},
-	ResourceKindDaemonSet:                {"daemonsets", ClientTypeExtensionClient, true},
-	ResourceKindDeployment:               {"deployments", ClientTypeExtensionClient, true},
+	ResourceKindDaemonSet:                {"daemonsets", ClientTypeAppsClient, true},
+	ResourceKindDeployment:               {"deployments", ClientTypeAppsClient, true},
 	ResourceKindEvent:                    {"events", ClientTypeDefault, true},
 	ResourceKindHorizontalPodAutoscaler:  {"horizontalpodautoscalers", ClientTypeAutoscalingClient, true},
 	ResourceKindIngress:                  {"ingresses", ClientTypeExtensionClient, true},
@@ -182,7 +211,7 @@ var KindToAPIMapping = map[string]APIMapping{
 	ResourceKindPersistentVolume:         {"persistentvolumes", ClientTypeDefault, false},
 	ResourceKindCustomResourceDefinition: {"customresourcedefinitions", ClientTypeAPIExtensionsClient, false},
 	ResourceKindPod:                      {"pods", ClientTypeDefault, true},
-	ResourceKindReplicaSet:               {"replicasets", ClientTypeExtensionClient, true},
+	ResourceKindReplicaSet:               {"replicasets", ClientTypeAppsClient, true},
 	ResourceKindReplicationController:    {"replicationcontrollers", ClientTypeDefault, true},
 	ResourceKindResourceQuota:            {"resourcequotas", ClientTypeDefault, true},
 	ResourceKindSecret:                   {"secrets", ClientTypeDefault, true},
@@ -191,17 +220,18 @@ var KindToAPIMapping = map[string]APIMapping{
 	ResourceKindStorageClass:             {"storageclasses", ClientTypeStorageClient, false},
 	ResourceKindEndpoint:                 {"endpoints", ClientTypeDefault, true},
 	ResourceKindClusterRole:              {"clusterroles", ClientTypeRbacClient, false},
+	ResourceKindPlugin:                   {"plugins", ClientTypePluginsClient, true},
 }
 
 // IsSelectorMatching returns true when an object with the given selector targets the same
-// Resources (or subset) that the tested object with the given selector.
-func IsSelectorMatching(labelSelector map[string]string, testedObjectLabels map[string]string) bool {
+// Resources (or subset) that the target object with the given selector.
+func IsSelectorMatching(srcSelector map[string]string, targetObjectLabels map[string]string) bool {
 	// If service has no selectors, then assume it targets different resource.
-	if len(labelSelector) == 0 {
+	if len(srcSelector) == 0 {
 		return false
 	}
-	for label, value := range labelSelector {
-		if rsValue, ok := testedObjectLabels[label]; !ok || rsValue != value {
+	for label, value := range srcSelector {
+		if rsValue, ok := targetObjectLabels[label]; !ok || rsValue != value {
 			return false
 		}
 	}
@@ -209,18 +239,14 @@ func IsSelectorMatching(labelSelector map[string]string, testedObjectLabels map[
 }
 
 // IsLabelSelectorMatching returns true when a resource with the given selector targets the same
-// Resources(or subset) that a tested object selector with the given selector.
-func IsLabelSelectorMatching(selector map[string]string, labelSelector *v1.LabelSelector) bool {
-	// If the resource has no selectors, then assume it targets different Pods.
-	if len(selector) == 0 {
-		return false
+// Resources(or subset) that a target object selector with the given selector.
+func IsLabelSelectorMatching(srcSelector map[string]string, targetLabelSelector *v1.LabelSelector) bool {
+	// Check to see if targetLabelSelector pointer is not nil.
+	if targetLabelSelector != nil {
+		targetObjectLabels := targetLabelSelector.MatchLabels
+		return IsSelectorMatching(srcSelector, targetObjectLabels)
 	}
-	for label, value := range selector {
-		if rsValue, ok := labelSelector.MatchLabels[label]; !ok || rsValue != value {
-			return false
-		}
-	}
-	return true
+	return false
 }
 
 // ListEverything is a list options used to list all resources without any filtering.

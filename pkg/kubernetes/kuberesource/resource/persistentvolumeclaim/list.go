@@ -21,11 +21,12 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-// PersistentVolumeClaimListComponent contains a list of Persistent Volume Claims in the cluster.
+// PersistentVolumeClaimList contains a list of Persistent Volume Claims in the cluster.
 type PersistentVolumeClaimList struct {
 	ListMeta api.ListMeta `json:"listMeta"`
 

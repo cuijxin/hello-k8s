@@ -15,18 +15,21 @@
 package client
 
 import (
+	"context"
 	"log"
 	"strings"
 
-	pluginclientset "hello-k8s/pkg/kubernetes/kuberesource/plugin/client/clientset/versioned"
-
-	restful "github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful"
 	v1 "k8s.io/api/authorization/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
+
+	pluginclientset "hello-k8s/pkg/kubernetes/kuberesource/plugin/client/clientset/versioned"
+	"hello-k8s/pkg/kubernetes/kuberesource/resource/customresourcedefinition"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/args"
 	authApi "hello-k8s/pkg/kubernetes/kuberesource/auth/api"
@@ -188,7 +191,7 @@ func (self *clientManager) CanI(req *restful.Request, ssar *v1.SelfSubjectAccess
 		return false
 	}
 
-	response, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(ssar)
+	response, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(context.TODO(), ssar, metaV1.CreateOptions{})
 	if err != nil {
 		log.Println(err)
 		return false
@@ -253,10 +256,28 @@ func (self *clientManager) VerberClient(req *restful.Request, config *rest.Confi
 		return nil, err
 	}
 
-	return NewResourceVerber(k8sClient.CoreV1().RESTClient(),
-		k8sClient.ExtensionsV1beta1().RESTClient(), k8sClient.AppsV1().RESTClient(),
-		k8sClient.BatchV1().RESTClient(), k8sClient.BatchV1beta1().RESTClient(), k8sClient.AutoscalingV1().RESTClient(),
-		k8sClient.StorageV1().RESTClient(), k8sClient.RbacV1().RESTClient(), apiextensionsclient.ApiextensionsV1beta1().RESTClient(), config), nil
+	pluginsclient, err := self.PluginClient(req)
+	if err != nil {
+		return nil, err
+	}
+
+	apiextensionsRestClient, err := customresourcedefinition.GetExtensionsAPIRestClient(apiextensionsclient)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResourceVerber(
+		k8sClient.CoreV1().RESTClient(),
+		k8sClient.ExtensionsV1beta1().RESTClient(),
+		k8sClient.AppsV1().RESTClient(),
+		k8sClient.BatchV1().RESTClient(),
+		k8sClient.BatchV1beta1().RESTClient(),
+		k8sClient.AutoscalingV1().RESTClient(),
+		k8sClient.StorageV1().RESTClient(),
+		k8sClient.RbacV1().RESTClient(),
+		apiextensionsRestClient,
+		pluginsclient.DashboardV1alpha1().RESTClient(),
+		config), nil
 }
 
 // SetTokenManager sets the token manager that will be used for token decryption.

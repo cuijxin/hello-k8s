@@ -21,12 +21,13 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetes "k8s.io/client-go/kubernetes"
 )
 
-// ConfigMapListComponent contains a list of Config Maps in the cluster.
+// ConfigMapList contains a list of Config Maps in the cluster.
 type ConfigMapList struct {
 	ListMeta api.ListMeta `json:"listMeta"`
 

@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	deploy "hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
 	"hello-k8s/pkg/model"
 	"hello-k8s/pkg/utils/errno"
@@ -45,14 +46,14 @@ func SendResponse(c *gin.Context, err error, data interface{}) {
 }
 
 func CreateNamespace(namespace string, clientset kubernetes.Interface) {
-	_, err := clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+	_, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		ns := &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: namespace,
 			},
 		}
-		clientset.CoreV1().Namespaces().Create(ns)
+		clientset.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{})
 	}
 }
 
@@ -260,17 +261,17 @@ func InitClusterRoleBinding(subjectKind, RoleRefKind, name, serviceaccountName, 
 // CheckMySQLClusterRBAC 检查MySQL集群RBAC对象的函数.
 func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleName string, clientset kubernetes.Interface) error {
 	log.Debugf("check mysql serviceaccount object.")
-	_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(serviceaccountName, metav1.GetOptions{})
+	_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(context.TODO(), serviceaccountName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		log.Debugf("create mysql agent serviceaccount object.")
 		sa := NewServiceAccount(serviceaccountName)
-		if _, err = clientset.CoreV1().ServiceAccounts(namespace).Create(sa); err != nil {
+		if _, err = clientset.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
 			return err
 		}
 	}
 
 	log.Debugf("check mysql rolebinding object.")
-	_, err = clientset.RbacV1().RoleBindings(namespace).Get(roleName, metav1.GetOptions{})
+	_, err = clientset.RbacV1().RoleBindings(namespace).Get(context.TODO(), roleName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		log.Debugf("create mysql agent rolebinding object.")
 		rb := &rbacv1.RoleBinding{
@@ -289,7 +290,7 @@ func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleN
 			Name:      serviceaccountName,
 			Namespace: namespace,
 		})
-		if _, err = clientset.RbacV1().RoleBindings(namespace).Create(rb); err != nil {
+		if _, err = clientset.RbacV1().RoleBindings(namespace).Create(context.TODO(), rb, metav1.CreateOptions{}); err != nil {
 			return err
 		}
 	}

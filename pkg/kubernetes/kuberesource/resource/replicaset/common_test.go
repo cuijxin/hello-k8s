@@ -20,6 +20,7 @@ import (
 
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
+
 	apps "k8s.io/api/apps/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,7 +36,7 @@ func TestToReplicaSet(t *testing.T) {
 			&common.PodInfo{Running: 1, Warnings: []common.Event{}},
 			ReplicaSet{
 				ObjectMeta: api.ObjectMeta{Name: "replica-set"},
-				TypeMeta:   api.TypeMeta{Kind: api.ResourceKindReplicaSet},
+				TypeMeta:   api.TypeMeta{Kind: api.ResourceKindReplicaSet, Scalable: true},
 				Pods:       common.PodInfo{Running: 1, Warnings: []common.Event{}},
 			},
 		},

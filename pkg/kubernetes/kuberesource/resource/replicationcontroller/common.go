@@ -15,11 +15,14 @@
 package replicationcontroller
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -45,7 +48,7 @@ func toLabelSelector(selector map[string]string) (labels.Selector, error) {
 func getServicesForDeletion(client client.Interface, labelSelector labels.Selector,
 	namespace string) ([]v1.Service, error) {
 
-	replicationControllers, err := client.CoreV1().ReplicationControllers(namespace).List(metaV1.ListOptions{
+	replicationControllers, err := client.CoreV1().ReplicationControllers(namespace).List(context.TODO(), metaV1.ListOptions{
 		LabelSelector: labelSelector.String(),
 		FieldSelector: fields.Everything().String(),
 	})
@@ -60,7 +63,7 @@ func getServicesForDeletion(client client.Interface, labelSelector labels.Select
 		return []v1.Service{}, nil
 	}
 
-	services, err := client.CoreV1().Services(namespace).List(metaV1.ListOptions{
+	services, err := client.CoreV1().Services(namespace).List(context.TODO(), metaV1.ListOptions{
 		LabelSelector: labelSelector.String(),
 		FieldSelector: fields.Everything().String(),
 	})

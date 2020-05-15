@@ -21,6 +21,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -111,7 +112,10 @@ func TestGetDeploymentDetail(t *testing.T) {
 						Namespace: "ns-1",
 						Labels:    map[string]string{"foo": "bar"},
 					},
-					TypeMeta: api.TypeMeta{Kind: api.ResourceKindDeployment},
+					TypeMeta: api.TypeMeta{
+						Kind:     api.ResourceKindDeployment,
+						Scalable: true,
+					},
 					Pods: common.PodInfo{
 						Desired:  &desired,
 						Current:  4,

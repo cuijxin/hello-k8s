@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"strings"
 
-	restful "github.com/emicklei/go-restful"
 	"hello-k8s/pkg/kubernetes/kuberesource/args"
 	"hello-k8s/pkg/kubernetes/kuberesource/auth"
 	authApi "hello-k8s/pkg/kubernetes/kuberesource/auth/api"
@@ -32,6 +31,8 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/settings"
 	"hello-k8s/pkg/kubernetes/kuberesource/sync"
 	"hello-k8s/pkg/kubernetes/kuberesource/systembanner"
+
+	restful "github.com/emicklei/go-restful"
 	"k8s.io/client-go/kubernetes/fake"
 )
 

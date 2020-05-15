@@ -15,12 +15,14 @@
 package persistentvolumeclaim
 
 import (
+	"context"
 	"log"
 	"strings"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	api "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
@@ -34,7 +36,7 @@ type PersistentVolumeClaimCell api.PersistentVolumeClaim
 func GetPodPersistentVolumeClaims(client client.Interface, namespace string, podName string,
 	dsQuery *dataselect.DataSelectQuery) (*PersistentVolumeClaimList, error) {
 
-	pod, err := client.CoreV1().Pods(namespace).Get(podName, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

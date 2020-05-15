@@ -2,12 +2,6 @@ package router
 
 import (
 	_ "hello-k8s/docs"
-	"hello-k8s/pkg/api/v1/atomapp/atomservice"
-	"hello-k8s/pkg/api/v1/atomapp/buildimage"
-	"hello-k8s/pkg/api/v1/atomapp/clonecode"
-	"hello-k8s/pkg/api/v1/operator/mysql"
-	"hello-k8s/pkg/api/v1/operator/pgsql"
-	"hello-k8s/pkg/api/v1/operator/redis"
 	"hello-k8s/pkg/api/v1/resources/configmap"
 	"hello-k8s/pkg/api/v1/resources/container"
 	"hello-k8s/pkg/api/v1/resources/cronjob"
@@ -57,37 +51,6 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		u.POST("", user.Create)
 	}
 
-	o := g.Group("/operator")
-	{
-		o.POST("/pgsqloperator", pgsql.CreateOperator)
-		o.DELETE("/pgsqloperator", pgsql.DeleteOperator)
-
-		o.POST("/redisoperator", redis.CreateOperator)
-		o.DELETE("/redisoperator", redis.DeleteOperator)
-
-		o.POST("/mysqloperator", mysql.CreateOperator)
-		o.DELETE("/mysqloperator", mysql.DeleteOperator)
-	}
-
-	c := g.Group("/cluster")
-	{
-		c.POST("/pgsqlcluster", pgsql.CreateCluster)
-		c.DELETE("/pgsqlcluster", pgsql.DeleteCluster)
-		c.GET("/pgsqlcluster/detail/:name/:namespace", pgsql.GetCluster)
-		c.GET("/pgsqlcluster/list/:namespace", pgsql.GetClusterList)
-
-		c.POST("/rediscluster", redis.CreateCluster)
-		c.DELETE("/rediscluster", redis.DeleteCluster)
-		c.GET("/rediscluster/detail/:name/:namespace", redis.GetCluster)
-		c.GET("/rediscluster/list/:namespace", redis.GetClusterList)
-
-		// MySQL Cluster
-		c.POST("/mysqlcluster", mysql.CreateCluster)
-		c.DELETE("/mysqlcluster", mysql.DeleteCluster)
-		c.GET("/mysqlcluster/detail/:name/:namespace", mysql.GetCluster)
-		c.GET("/mysqlcluster/list/:namespace", mysql.GetClusterList)
-	}
-
 	r := g.Group("/resource")
 	{
 		r.POST("/persistentvolumeclaim/create", persistentvolumeclaim.Create)
@@ -133,19 +96,6 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		r.GET("/pod/list/:namespace", pod.GetPodList)
 		r.GET("/pod/container/:podId/:namespace", container.GetPodContainers)
 		r.GET("/container/logs/:namespace/:podId/:container", container.GetLogs)
-	}
-
-	a := g.Group("/atomapp")
-	{
-		a.POST("/clonecode/create", clonecode.Create)
-
-		a.POST("/buildimage/create", buildimage.Create)
-
-		a.POST("/atomservice/create", atomservice.Create)
-
-		a.POST("/atomservice/scale", atomservice.Scale)
-
-		a.POST("/atomservice/updateimage", atomservice.UpdateImage)
 	}
 
 	// The health check handlers

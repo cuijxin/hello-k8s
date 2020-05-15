@@ -1,6 +1,7 @@
 package configmap
 
 import (
+	"context"
 	"encoding/base64"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
@@ -39,7 +40,7 @@ func Create(c *gin.Context) {
 	tool.CreateNamespace(r.Namespace, clientset)
 
 	cm := newConfigMap(r)
-	result, err := clientset.CoreV1().ConfigMaps(r.Namespace).Create(cm)
+	result, err := clientset.CoreV1().ConfigMaps(r.Namespace).Create(context.TODO(), cm, metav1.CreateOptions{})
 	if err != nil {
 		tool.SendResponse(c, errno.ErrCreateConfigMap, err)
 		return

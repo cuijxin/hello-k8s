@@ -15,10 +15,12 @@
 package service
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/endpoint"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
@@ -42,7 +44,7 @@ type ServiceDetail struct {
 // GetServiceDetail gets service details.
 func GetServiceDetail(client k8sClient.Interface, namespace, name string) (*ServiceDetail, error) {
 	log.Printf("Getting details of %s service in %s namespace", name, namespace)
-	serviceData, err := client.CoreV1().Services(namespace).Get(name, metaV1.GetOptions{})
+	serviceData, err := client.CoreV1().Services(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

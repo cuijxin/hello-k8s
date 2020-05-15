@@ -15,6 +15,7 @@
 package sidecar
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	integrationapi "hello-k8s/pkg/kubernetes/kuberesource/integration/api"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/integration/metric/common"
+
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -200,14 +202,34 @@ func (self sidecarClient) allInOneDownload(selector sidecarSelector, metricName 
 			result.PutMetrics(nil, err)
 			return
 		}
+
 		if len(result) != len(rawResults.Items) {
-			result.PutMetrics(nil, fmt.Errorf(`Received invalid number of resources from sidecar. Expected %d received %d`, len(result), len(rawResults.Items)))
-			return
+			log.Printf(`received %d resources from sidecar instead of %d`, len(rawResults.Items), len(result))
 		}
 
-		for i, rawResult := range rawResults.Items {
+		// rawResult.Items have indefinite order.
+		// So it needs to be sorted by order of selector.Resources.
+		mappedResults := map[string]metricapi.SidecarMetric{}
+		for _, rawResult := range rawResults.Items {
+			if exists := len(rawResult.UIDs) > 0; exists {
+				mappedResults[rawResult.UIDs[0]] = rawResult
+			}
+		}
+		sortedResults := make([]metricapi.SidecarMetric, len(selector.Resources))
+		for i, resource := range selector.Resources {
+			if mappedResult, exists := mappedResults[resource]; exists {
+				sortedResults[i] = mappedResult
+			}
+		}
+
+		for i, rawResult := range sortedResults {
 			dataPoints := DataPointsFromMetricJSONFormat(rawResult.MetricPoints)
 
+			if rawResult.MetricName == "" && len(rawResult.UIDs) == 0 {
+				result[i].Metric <- nil
+				result[i].Error <- fmt.Errorf("can not get metrics for %s", selector.Resources[i])
+				continue
+			}
 			result[i].Metric <- &metricapi.Metric{
 				DataPoints:   dataPoints,
 				MetricPoints: rawResult.MetricPoints,
@@ -229,7 +251,7 @@ func (self sidecarClient) allInOneDownload(selector sidecarSelector, metricName 
 // unmarshalType performs sidecar GET request to the specifies path and transfers
 // the data to the interface provided.
 func (self sidecarClient) unmarshalType(path string, v interface{}) error {
-	rawData, err := self.client.Get("/api/v1/dashboard/" + path).DoRaw()
+	rawData, err := self.client.Get("/api/v1/dashboard/" + path).DoRaw(context.TODO())
 	if err != nil {
 		return err
 	}

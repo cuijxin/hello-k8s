@@ -15,10 +15,13 @@
 package daemonset
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/service"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -28,7 +31,7 @@ import (
 func GetDaemonSetServices(client client.Interface, dsQuery *dataselect.DataSelectQuery,
 	namespace, name string) (*service.ServiceList, error) {
 
-	daemonSet, err := client.AppsV1().DaemonSets(namespace).Get(name, metaV1.GetOptions{})
+	daemonSet, err := client.AppsV1().DaemonSets(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

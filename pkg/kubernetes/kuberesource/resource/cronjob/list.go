@@ -22,12 +22,13 @@ import (
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	"k8s.io/api/batch/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
 
-// CronJobListComponent contains a list of CronJobs in the cluster.
+// CronJobList contains a list of CronJobs in the cluster.
 type CronJobList struct {
 	ListMeta          api.ListMeta       `json:"listMeta"`
 	CumulativeMetrics []metricapi.Metric `json:"cumulativeMetrics"`

@@ -26,8 +26,10 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"time"
 
 	certapi "hello-k8s/pkg/kubernetes/kuberesource/cert/api"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -54,8 +56,14 @@ func (self *ecdsaCreator) GenerateCertificate(key interface{}) []byte {
 	ecdsaKey := self.getKey(key)
 	pod := self.getDashboardPod()
 
+	notBefore := time.Now()
+	validFor, _ := time.ParseDuration("8760h")
+	notAfter := notBefore.Add(validFor)
+
 	template := x509.Certificate{
 		SerialNumber: self.generateSerialNumber(),
+		NotAfter:     notAfter,
+		NotBefore:    notBefore,
 	}
 
 	if len(pod.Name) > 0 && len(pod.Namespace) > 0 {

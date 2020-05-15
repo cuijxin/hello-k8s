@@ -15,10 +15,12 @@
 package container
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/logs"
+
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -46,6 +48,40 @@ var log5 = logs.LogLine{
 	Timestamp: "5",
 	Content:   "log5",
 }
+
+var details *logs.LogDetails
+
+func benchmarkGetLogDetails(lines int, timestamp string, b *testing.B) {
+	// Generate raw logs.
+	rawLogs := ""
+	for i := 0; i < lines; i++ {
+		rawLogs += fmt.Sprintf("%[1]d log%[1]d\n", i)
+	}
+
+	selector := &logs.Selection{
+		ReferencePoint: logs.LogLineId{
+			LogTimestamp: logs.LogTimestamp(timestamp),
+			LineNum:      1,
+		},
+		OffsetFrom: -2,
+		OffsetTo:   0,
+	}
+
+	var d *logs.LogDetails
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		d = ConstructLogDetails("pod-1", rawLogs, "list", selector)
+	}
+	b.StopTimer()
+
+	details = d
+}
+
+func BenchmarkGetLogDetails1(b *testing.B) { benchmarkGetLogDetails(2000, "1999", b) }
+func BenchmarkGetLogDetails2(b *testing.B) { benchmarkGetLogDetails(2000, "999", b) }
+func BenchmarkGetLogDetails3(b *testing.B) { benchmarkGetLogDetails(2000, "99", b) }
+func BenchmarkGetLogDetails4(b *testing.B) { benchmarkGetLogDetails(2000, "9", b) }
 
 func TestGetLogs(t *testing.T) {
 	// for the test cases, the line read limit is reduced to 10

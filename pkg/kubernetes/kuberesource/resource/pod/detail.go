@@ -15,6 +15,7 @@
 package pod
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -30,6 +31,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/controller"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/persistentvolumeclaim"
+
 	v1 "k8s.io/api/core/v1"
 	res "k8s.io/apimachinery/pkg/api/resource"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,7 +102,7 @@ func GetPodDetail(client kubernetes.Interface, metricClient metricapi.MetricClie
 		SecretList:    common.GetSecretListChannel(client, common.NewSameNamespaceQuery(namespace), 1),
 	}
 
-	pod, err := client.CoreV1().Pods(namespace).Get(name, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

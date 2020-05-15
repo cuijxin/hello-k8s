@@ -15,10 +15,13 @@
 package replicaset
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/service"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -27,7 +30,7 @@ import (
 func GetReplicaSetServices(client client.Interface, dsQuery *dataselect.DataSelectQuery,
 	namespace, name string) (*service.ServiceList, error) {
 
-	replicaSet, err := client.AppsV1().ReplicaSets(namespace).Get(name, metaV1.GetOptions{})
+	replicaSet, err := client.AppsV1().ReplicaSets(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

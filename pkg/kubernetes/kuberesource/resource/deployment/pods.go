@@ -15,12 +15,15 @@
 package deployment
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -29,7 +32,7 @@ import (
 func GetDeploymentPods(client client.Interface, metricClient metricapi.MetricClient,
 	dsQuery *dataselect.DataSelectQuery, namespace, deploymentName string) (*pod.PodList, error) {
 
-	deployment, err := client.AppsV1().Deployments(namespace).Get(deploymentName, metaV1.GetOptions{})
+	deployment, err := client.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metaV1.GetOptions{})
 	if err != nil {
 		return pod.EmptyPodList, err
 	}

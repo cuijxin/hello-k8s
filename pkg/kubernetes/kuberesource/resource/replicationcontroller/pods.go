@@ -15,6 +15,7 @@
 package replicationcontroller
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
@@ -23,6 +24,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
@@ -51,7 +53,7 @@ func GetReplicationControllerPods(client k8sClient.Interface,
 }
 
 func getRawReplicationControllerPods(client k8sClient.Interface, rcName, namespace string) ([]v1.Pod, error) {
-	rc, err := client.CoreV1().ReplicationControllers(namespace).Get(rcName, metaV1.GetOptions{})
+	rc, err := client.CoreV1().ReplicationControllers(namespace).Get(context.TODO(), rcName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

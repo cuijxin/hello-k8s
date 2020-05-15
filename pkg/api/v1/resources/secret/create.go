@@ -1,6 +1,7 @@
 package secret
 
 import (
+	"context"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"hello-k8s/pkg/utils/tool"
@@ -38,7 +39,7 @@ func Create(c *gin.Context) {
 	tool.CreateNamespace(r.Namespace, clientset)
 
 	s := newSecret(r)
-	result, err := clientset.CoreV1().Secrets(r.Namespace).Create(s)
+	result, err := clientset.CoreV1().Secrets(r.Namespace).Create(context.TODO(), s, metav1.CreateOptions{})
 	if err != nil {
 		tool.SendResponse(c, errno.ErrCreateSecret, err)
 		return

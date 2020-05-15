@@ -1,6 +1,7 @@
 package persistentvolumeclaim
 
 import (
+	"context"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"strconv"
@@ -42,7 +43,7 @@ func Create(c *gin.Context) {
 	tool.CreateNamespace(r.Namespace, clientset)
 
 	pvc := newPersistentVolumeClaim(r)
-	result, err := clientset.CoreV1().PersistentVolumeClaims(r.Namespace).Create(pvc)
+	result, err := clientset.CoreV1().PersistentVolumeClaims(r.Namespace).Create(context.TODO(), pvc, metav1.CreateOptions{})
 	if err != nil {
 		tool.SendResponse(c, errno.ErrCreatePersistentVolumeClaim, err)
 		return

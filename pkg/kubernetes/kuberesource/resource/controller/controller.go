@@ -15,12 +15,14 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	apps "k8s.io/api/apps/v1"
 	batch "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
@@ -65,37 +67,37 @@ func NewResourceController(ref meta.OwnerReference, namespace string, client cli
 	ResourceController, error) {
 	switch strings.ToLower(ref.Kind) {
 	case api.ResourceKindJob:
-		job, err := client.BatchV1().Jobs(namespace).Get(ref.Name, meta.GetOptions{})
+		job, err := client.BatchV1().Jobs(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		return JobController(*job), nil
 	case api.ResourceKindPod:
-		pod, err := client.CoreV1().Pods(namespace).Get(ref.Name, meta.GetOptions{})
+		pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		return PodController(*pod), nil
 	case api.ResourceKindReplicaSet:
-		rs, err := client.AppsV1().ReplicaSets(namespace).Get(ref.Name, meta.GetOptions{})
+		rs, err := client.AppsV1().ReplicaSets(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		return ReplicaSetController(*rs), nil
 	case api.ResourceKindReplicationController:
-		rc, err := client.CoreV1().ReplicationControllers(namespace).Get(ref.Name, meta.GetOptions{})
+		rc, err := client.CoreV1().ReplicationControllers(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		return ReplicationControllerController(*rc), nil
 	case api.ResourceKindDaemonSet:
-		ds, err := client.AppsV1().DaemonSets(namespace).Get(ref.Name, meta.GetOptions{})
+		ds, err := client.AppsV1().DaemonSets(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		return DaemonSetController(*ds), nil
 	case api.ResourceKindStatefulSet:
-		ss, err := client.AppsV1().StatefulSets(namespace).Get(ref.Name, meta.GetOptions{})
+		ss, err := client.AppsV1().StatefulSets(namespace).Get(context.TODO(), ref.Name, meta.GetOptions{})
 		if err != nil {
 			return nil, err
 		}

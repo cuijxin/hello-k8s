@@ -15,10 +15,12 @@
 package container
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/logs"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,7 +40,7 @@ type PodContainerList struct {
 
 // GetPodContainers returns containers that a pod has.
 func GetPodContainers(client kubernetes.Interface, namespace, podID string) (*PodContainerList, error) {
-	pod, err := client.CoreV1().Pods(namespace).Get(podID, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podID, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +58,7 @@ func GetPodContainers(client kubernetes.Interface, namespace, podID string) (*Po
 // are returned. Previous indicates to read archived logs created by log rotation or container crash
 func GetLogDetails(client kubernetes.Interface, namespace, podID string, container string,
 	logSelector *logs.Selection, usePreviousLogs bool) (*logs.LogDetails, error) {
-	pod, err := client.CoreV1().Pods(namespace).Get(podID, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podID, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +132,7 @@ func openStream(client kubernetes.Interface, namespace, podID string, logOptions
 		Name(podID).
 		Resource("pods").
 		SubResource("log").
-		VersionedParams(logOptions, scheme.ParameterCodec).Stream()
+		VersionedParams(logOptions, scheme.ParameterCodec).Stream(context.TODO())
 }
 
 // ConstructLogDetails creates a new log details structure for given parameters.

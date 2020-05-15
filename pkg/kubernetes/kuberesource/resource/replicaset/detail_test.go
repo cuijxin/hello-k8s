@@ -24,6 +24,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/horizontalpodautoscaler"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/service"
+
 	apps "k8s.io/api/apps/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -54,7 +55,7 @@ func TestGetReplicaSetDetail(t *testing.T) {
 				ReplicaSet: ReplicaSet{
 					ObjectMeta: api.ObjectMeta{Name: "rs-1", Namespace: "ns-1",
 						Labels: map[string]string{"app": "test"}},
-					TypeMeta: api.TypeMeta{Kind: api.ResourceKindReplicaSet},
+					TypeMeta: api.TypeMeta{Kind: api.ResourceKindReplicaSet, Scalable: true},
 					Pods: common.PodInfo{
 						Warnings: []common.Event{},
 						Desired:  &replicas,
@@ -118,7 +119,7 @@ func TestToReplicaSetDetail(t *testing.T) {
 			horizontalpodautoscaler.HorizontalPodAutoscalerList{},
 			ReplicaSetDetail{
 				ReplicaSet: ReplicaSet{
-					TypeMeta: api.TypeMeta{Kind: api.ResourceKindReplicaSet},
+					TypeMeta: api.TypeMeta{Kind: api.ResourceKindReplicaSet, Scalable: true},
 				},
 				Errors: []error{},
 			},
@@ -136,7 +137,7 @@ func TestToReplicaSetDetail(t *testing.T) {
 			ReplicaSetDetail{
 				ReplicaSet: ReplicaSet{
 					ObjectMeta: api.ObjectMeta{Name: "replica-set"},
-					TypeMeta:   api.TypeMeta{Kind: api.ResourceKindReplicaSet},
+					TypeMeta:   api.TypeMeta{Kind: api.ResourceKindReplicaSet, Scalable: true},
 				},
 				HorizontalPodAutoscalerList: horizontalpodautoscaler.HorizontalPodAutoscalerList{
 					HorizontalPodAutoscalers: []horizontalpodautoscaler.HorizontalPodAutoscaler{{

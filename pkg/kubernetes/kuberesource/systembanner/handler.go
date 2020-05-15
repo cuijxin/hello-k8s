@@ -17,8 +17,9 @@ package systembanner
 import (
 	"net/http"
 
-	restful "github.com/emicklei/go-restful"
 	"hello-k8s/pkg/kubernetes/kuberesource/systembanner/api"
+
+	restful "github.com/emicklei/go-restful"
 )
 
 // SystemBannerHandler manages all endpoints related to system banner management.

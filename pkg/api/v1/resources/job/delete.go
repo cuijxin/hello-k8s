@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 
@@ -35,10 +36,11 @@ func DeleteJob(c *gin.Context) {
 		return
 	}
 
-	deletePolicy := metav1.DeletePropagationBackground
-	if err := clientset.BatchV1().Jobs(r.Namespace).Delete(r.Name, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	}); err != nil {
+	deletePropagation := metav1.DeletePropagationBackground
+	options := metav1.DeleteOptions{
+		PropagationPolicy: &deletePropagation,
+	}
+	if err := clientset.BatchV1().Jobs(r.Namespace).Delete(context.TODO(), r.Name, options); err != nil {
 		tool.SendResponse(c, errno.ErrDeleteJob, err)
 		return
 	}

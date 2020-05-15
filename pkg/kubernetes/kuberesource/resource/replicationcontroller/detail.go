@@ -15,10 +15,12 @@
 package replicationcontroller
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
@@ -46,7 +48,7 @@ type ReplicationControllerSpec struct {
 func GetReplicationControllerDetail(client k8sClient.Interface, namespace, name string) (*ReplicationControllerDetail, error) {
 	log.Printf("Getting details of %s replication controller in %s namespace", name, namespace)
 
-	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(name, metaV1.GetOptions{})
+	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +68,14 @@ func UpdateReplicasCount(client k8sClient.Interface, namespace, name string, spe
 	log.Printf("Updating replicas count to %d for %s replication controller from %s namespace",
 		spec.Replicas, name, namespace)
 
-	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(name, metaV1.GetOptions{})
+	replicationController, err := client.CoreV1().ReplicationControllers(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
 	replicationController.Spec.Replicas = &spec.Replicas
 
-	_, err = client.CoreV1().ReplicationControllers(namespace).Update(replicationController)
+	_, err = client.CoreV1().ReplicationControllers(namespace).Update(context.TODO(), replicationController, metaV1.UpdateOptions{})
 	if err != nil {
 		return err
 	}

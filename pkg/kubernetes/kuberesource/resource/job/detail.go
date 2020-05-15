@@ -15,8 +15,11 @@
 package job
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
+
 	batch "k8s.io/api/batch/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
@@ -36,7 +39,7 @@ type JobDetail struct {
 
 // GetJobDetail gets job details.
 func GetJobDetail(client k8sClient.Interface, namespace, name string) (*JobDetail, error) {
-	jobData, err := client.BatchV1().Jobs(namespace).Get(name, metaV1.GetOptions{})
+	jobData, err := client.BatchV1().Jobs(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

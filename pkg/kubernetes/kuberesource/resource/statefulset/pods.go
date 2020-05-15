@@ -15,6 +15,7 @@
 package statefulset
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
@@ -23,6 +24,7 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
+
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +54,7 @@ func GetStatefulSetPods(client kubernetes.Interface, metricClient metricapi.Metr
 
 // getRawStatefulSetPods return array of api pods targeting pet set with given name.
 func getRawStatefulSetPods(client kubernetes.Interface, name, namespace string) ([]v1.Pod, error) {
-	statefulSet, err := client.AppsV1().StatefulSets(namespace).Get(name, metaV1.GetOptions{})
+	statefulSet, err := client.AppsV1().StatefulSets(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

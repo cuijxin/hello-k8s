@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/sync"
+
 	"k8s.io/client-go/kubernetes/fake"
 )
 

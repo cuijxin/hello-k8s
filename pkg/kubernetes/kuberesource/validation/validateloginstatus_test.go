@@ -21,8 +21,9 @@ import (
 	"reflect"
 	"testing"
 
-	restful "github.com/emicklei/go-restful"
 	"hello-k8s/pkg/kubernetes/kuberesource/client"
+
+	restful "github.com/emicklei/go-restful"
 )
 
 func TestValidateLoginStatus(t *testing.T) {

@@ -16,6 +16,7 @@ package sync
 
 import (
 	syncApi "hello-k8s/pkg/kubernetes/kuberesource/sync/api"
+
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 )

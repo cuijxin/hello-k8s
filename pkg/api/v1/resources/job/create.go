@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"reflect"
@@ -41,7 +42,7 @@ func Create(c *gin.Context) {
 	tool.CreateNamespace(r.Namespace, clientset)
 
 	job := newJob(r)
-	result, err := clientset.BatchV1().Jobs(r.Namespace).Create(job)
+	result, err := clientset.BatchV1().Jobs(r.Namespace).Create(context.TODO(), job, metaV1.CreateOptions{})
 	if err != nil {
 		tool.SendResponse(c, errno.ErrCreateJob, err)
 		return

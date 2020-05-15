@@ -45,8 +45,7 @@ type PodMetrics struct {
 	MemoryUsageHistory []metricapi.MetricPoint `json:"memoryUsageHistory"`
 }
 
-func getMetricsPerPod(pods []v1.Pod, metricClient metricapi.MetricClient,
-	dsQuery *dataselect.DataSelectQuery) (
+func getMetricsPerPod(pods []v1.Pod, metricClient metricapi.MetricClient, dsQuery *dataselect.DataSelectQuery) (
 	*MetricsByPod, error) {
 	log.Println("Getting pod metrics")
 
@@ -98,5 +97,5 @@ func getPodUIDFromMetric(metric metricapi.Metric) (types.UID, error) {
 		return "", errors.NewInvalid("Found multiple UIDs. Metric should contain data for single resource only.")
 	}
 
-	return types.UID(uidList[0]), nil
+	return uidList[0], nil
 }

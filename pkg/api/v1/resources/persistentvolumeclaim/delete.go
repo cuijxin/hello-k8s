@@ -1,6 +1,7 @@
 package persistentvolumeclaim
 
 import (
+	"context"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/utils/errno"
 	"hello-k8s/pkg/utils/tool"
@@ -34,10 +35,11 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	deletePolicy := metav1.DeletePropagationBackground
-	if err := clientset.CoreV1().PersistentVolumeClaims(r.Namespace).Delete(r.Name, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	}); err != nil {
+	deletePropagation := metav1.DeletePropagationBackground
+	options := metav1.DeleteOptions{
+		PropagationPolicy: &deletePropagation,
+	}
+	if err := clientset.CoreV1().PersistentVolumeClaims(r.Namespace).Delete(context.TODO(), r.Name, options); err != nil {
 		tool.SendResponse(c, errno.ErrDeletePersistentVolumeClaim, err)
 		return
 	}

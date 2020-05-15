@@ -15,6 +15,7 @@
 package replicaset
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
@@ -23,20 +24,20 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/pod"
+
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	k8sClient "k8s.io/client-go/kubernetes"
 )
 
 // GetReplicaSetPods return list of pods targeting replica set.
 func GetReplicaSetPods(client k8sClient.Interface, metricClient metricapi.MetricClient,
-	dsQuery *dataselect.DataSelectQuery, petSetName, namespace string) (*pod.PodList, error) {
-	log.Printf("Getting replication controller %s pods in namespace %s", petSetName, namespace)
+	dsQuery *dataselect.DataSelectQuery, replicaSetName, namespace string) (*pod.PodList, error) {
+	log.Printf("Getting replication controller %s pods in namespace %s", replicaSetName, namespace)
 
-	pods, err := getRawReplicaSetPods(client, petSetName, namespace)
+	pods, err := getRawReplicaSetPods(client, replicaSetName, namespace)
 	if err != nil {
 		return pod.EmptyPodList, err
 	}
@@ -51,14 +52,18 @@ func GetReplicaSetPods(client k8sClient.Interface, metricClient metricapi.Metric
 	return &podList, nil
 }
 
-func getRawReplicaSetPods(client k8sClient.Interface, petSetName, namespace string) ([]v1.Pod, error) {
-	rs, err := client.AppsV1().ReplicaSets(namespace).Get(petSetName, metaV1.GetOptions{})
+func getRawReplicaSetPods(client k8sClient.Interface, replicaSetName, namespace string) ([]v1.Pod, error) {
+	rs, err := client.AppsV1().ReplicaSets(namespace).Get(context.TODO(), replicaSetName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
+	labelSelector := labels.SelectorFromSet(rs.Spec.Selector.MatchLabels)
 	channels := &common.ResourceChannels{
-		PodList: common.GetPodListChannel(client, common.NewSameNamespaceQuery(namespace), 1),
+		PodList: common.GetPodListChannelWithOptions(client, common.NewSameNamespaceQuery(namespace),
+			metaV1.ListOptions{
+				LabelSelector: labelSelector.String(),
+			}, 1),
 	}
 
 	podList := <-channels.PodList.List
@@ -75,15 +80,15 @@ func getReplicaSetPodInfo(client k8sClient.Interface, replicaSet *apps.ReplicaSe
 		PodList: common.GetPodListChannelWithOptions(client, common.NewSameNamespaceQuery(replicaSet.Namespace),
 			metaV1.ListOptions{
 				LabelSelector: labelSelector.String(),
-				FieldSelector: fields.Everything().String(),
 			}, 1),
 	}
 
-	pods := <-channels.PodList.List
+	podList := <-channels.PodList.List
 	if err := <-channels.PodList.Error; err != nil {
 		return nil, err
 	}
 
-	podInfo := common.GetPodInfo(replicaSet.Status.Replicas, replicaSet.Spec.Replicas, pods.Items)
+	filterPod := common.FilterPodsByControllerRef(replicaSet, podList.Items)
+	podInfo := common.GetPodInfo(replicaSet.Status.Replicas, replicaSet.Spec.Replicas, filterPod)
 	return &podInfo, nil
 }

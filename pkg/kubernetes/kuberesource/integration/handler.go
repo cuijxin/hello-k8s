@@ -17,8 +17,9 @@ package integration
 import (
 	"net/http"
 
-	restful "github.com/emicklei/go-restful"
 	"hello-k8s/pkg/kubernetes/kuberesource/integration/api"
+
+	restful "github.com/emicklei/go-restful"
 )
 
 // IntegrationHandler manages all endpoints related to integrated applications, such as state.

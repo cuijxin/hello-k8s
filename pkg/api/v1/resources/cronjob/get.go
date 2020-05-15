@@ -37,11 +37,11 @@ func GetCronJob(c *gin.Context) {
 		return
 	}
 
-	cronJob, err := cronjob.GetCronJobDetail(clientset, namespace, name)
+	detail, err := cronjob.GetCronJobDetail(clientset, namespace, name)
 	if err != nil {
 		tool.SendResponse(c, errno.ErrGetCronJob, err)
 		return
 	}
 
-	tool.SendResponse(c, errno.OK, cronJob)
+	tool.SendResponse(c, errno.OK, detail)
 }

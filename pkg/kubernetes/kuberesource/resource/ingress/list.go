@@ -15,10 +15,13 @@
 package ingress
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	extensions "k8s.io/api/extensions/v1beta1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -32,7 +35,7 @@ type Ingress struct {
 	Endpoints []common.Endpoint `json:"endpoints"`
 }
 
-// IngressListComponent - response structure for a queried ingress list.
+// IngressList - response structure for a queried ingress list.
 type IngressList struct {
 	api.ListMeta `json:"listMeta"`
 
@@ -46,7 +49,7 @@ type IngressList struct {
 // GetIngressList returns all ingresses in the given namespace.
 func GetIngressList(client client.Interface, namespace *common.NamespaceQuery,
 	dsQuery *dataselect.DataSelectQuery) (*IngressList, error) {
-	ingressList, err := client.ExtensionsV1beta1().Ingresses(namespace.ToRequestParam()).List(api.ListEverything)
+	ingressList, err := client.ExtensionsV1beta1().Ingresses(namespace.ToRequestParam()).List(context.TODO(), api.ListEverything)
 
 	nonCriticalErrors, criticalError := errors.HandleError(err)
 	if criticalError != nil {

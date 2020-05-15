@@ -15,9 +15,7 @@
 package api
 
 import (
-	restful "github.com/emicklei/go-restful"
-	authApi "hello-k8s/pkg/kubernetes/kuberesource/auth/api"
-	pluginclientset "hello-k8s/pkg/kubernetes/kuberesource/plugin/client/clientset/versioned"
+	"github.com/emicklei/go-restful"
 	v1 "k8s.io/api/authorization/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,13 +23,16 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
+
+	authApi "hello-k8s/pkg/kubernetes/kuberesource/auth/api"
+	pluginclientset "hello-k8s/pkg/kubernetes/kuberesource/plugin/client/clientset/versioned"
 )
 
 const (
-	// Resource information that are used as csrf token storage. Can be accessible by multiple dashboard replicas.
+	// CsrfTokenSecretName is the resource information that are used as csrf token storage. Can be accessible by multiple dashboard replicas.
 	CsrfTokenSecretName = "kubernetes-dashboard-csrf"
 
-	// Name of the data var that holds the csrf token inside the secret.
+	// CsrfTokenSecretData is the name of the data var that holds the csrf token inside the secret.
 	CsrfTokenSecretData = "csrf"
 )
 
@@ -43,6 +44,7 @@ type ClientManager interface {
 	APIExtensionsClient(req *restful.Request) (apiextensionsclientset.Interface, error)
 	PluginClient(req *restful.Request) (pluginclientset.Interface, error)
 	InsecureAPIExtensionsClient() apiextensionsclientset.Interface
+	InsecurePluginClient() pluginclientset.Interface
 	CanI(req *restful.Request, ssar *v1.SelfSubjectAccessReview) bool
 	Config(req *restful.Request) (*rest.Config, error)
 	ClientCmdConfig(req *restful.Request) (clientcmd.ClientConfig, error)

@@ -15,10 +15,13 @@
 package event
 
 import (
+	"context"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -128,7 +131,7 @@ func GetNodeEvents(client kubernetes.Interface, dsQuery *dataselect.DataSelectQu
 	scheme.AddKnownTypes(groupVersion, &v1.Node{})
 
 	mc := client.CoreV1().Nodes()
-	node, err := mc.Get(nodeName, metaV1.GetOptions{})
+	node, err := mc.Get(context.TODO(), nodeName, metaV1.GetOptions{})
 	if err != nil {
 		return &eventList, err
 	}
@@ -144,11 +147,11 @@ func GetNodeEvents(client kubernetes.Interface, dsQuery *dataselect.DataSelectQu
 
 // GetNamespaceEvents gets events associated to a namespace with given name.
 func GetNamespaceEvents(client kubernetes.Interface, dsQuery *dataselect.DataSelectQuery, namespace string) (common.EventList, error) {
-	events, _ := client.CoreV1().Events(namespace).List(api.ListEverything)
+	events, _ := client.CoreV1().Events(namespace).List(context.TODO(), api.ListEverything)
 	return CreateEventList(FillEventsType(events.Items), dsQuery), nil
 }
 
-// Based on event Reason fills event Type in order to allow correct filtering by Type.
+// FillEventsType is based on event Reason fills event Type in order to allow correct filtering by Type.
 func FillEventsType(events []v1.Event) []v1.Event {
 	for i := range events {
 		// Fill in only events with empty type.

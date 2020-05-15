@@ -15,9 +15,11 @@
 package namespace
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
+
 	api "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -39,7 +41,7 @@ func CreateNamespace(spec *NamespaceSpec, client kubernetes.Interface) error {
 		},
 	}
 
-	_, err := client.CoreV1().Namespaces().Create(namespace)
+	_, err := client.CoreV1().Namespaces().Create(context.TODO(), namespace, metaV1.CreateOptions{})
 	return err
 }
 

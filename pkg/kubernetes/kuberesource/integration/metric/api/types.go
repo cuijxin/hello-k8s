@@ -20,6 +20,7 @@ import (
 
 	"hello-k8s/pkg/kubernetes/kuberesource/api"
 	integrationapi "hello-k8s/pkg/kubernetes/kuberesource/integration/api"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -236,7 +237,8 @@ func (self MetricPromises) GetMetrics() ([]Metric, error) {
 	for _, metricPromise := range self {
 		metric, err := metricPromise.GetMetric()
 		if err != nil {
-			return nil, err
+			// Do not fail when cannot resolve one of the metrics promises and return what can be resolved.
+			continue
 		}
 
 		if metric == nil {

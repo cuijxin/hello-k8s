@@ -3,10 +3,7 @@ package client
 import (
 	"path/filepath"
 
-	pgsqlClientset "github.com/cuijxin/postgres-operator-atom/pkg/generated/clientset/versioned"
 	"github.com/lexkong/log"
-	mysqlClientset "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	redisClientset "github.com/spotahome/redis-operator/client/k8s/clientset/versioned"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -35,47 +32,6 @@ func NewApiExtensionsClient() (*apiextensionsclientset.Clientset, error) {
 	}
 
 	client, err := apiextensionsclientset.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
-}
-
-func NewPostgresClientSet() (pgsqlClientset.Interface, error) {
-	config, err := getKubernetesConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := pgsqlClientset.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-func NewRedisClientSet() (redisClientset.Interface, error) {
-	config, err := getKubernetesConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := redisClientset.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
-}
-
-func NewMySQLClientSet() (mysqlClientset.Interface, error) {
-	config, err := getKubernetesConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := mysqlClientset.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}

@@ -15,12 +15,14 @@
 package replicaset
 
 import (
+	"context"
 	"log"
 
 	"hello-k8s/pkg/kubernetes/kuberesource/errors"
 	metricapi "hello-k8s/pkg/kubernetes/kuberesource/integration/metric/api"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	hpa "hello-k8s/pkg/kubernetes/kuberesource/resource/horizontalpodautoscaler"
+
 	apps "k8s.io/api/apps/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClient "k8s.io/client-go/kubernetes"
@@ -48,7 +50,7 @@ func GetReplicaSetDetail(client k8sClient.Interface, metricClient metricapi.Metr
 	namespace, name string) (*ReplicaSetDetail, error) {
 	log.Printf("Getting details of %s service in %s namespace", name, namespace)
 
-	rs, err := client.AppsV1().ReplicaSets(namespace).Get(name, metaV1.GetOptions{})
+	rs, err := client.AppsV1().ReplicaSets(namespace).Get(context.TODO(), name, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

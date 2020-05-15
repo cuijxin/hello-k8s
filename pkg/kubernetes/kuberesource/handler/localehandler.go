@@ -24,6 +24,7 @@ import (
 
 	"github.com/golang/glog"
 	"golang.org/x/text/language"
+
 	"hello-k8s/pkg/kubernetes/kuberesource/args"
 )
 
@@ -86,16 +87,6 @@ func getAssetsDir() string {
 	return filepath.Join(filepath.Dir(path), assetsDir)
 }
 
-func dirExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			glog.Warningf(name)
-			return false
-		}
-	}
-	return true
-}
-
 // LocaleHandler serves different html versions based on the Accept-Language header.
 func (handler *LocaleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.EscapedPath() == "/" || r.URL.EscapedPath() == "/index.html" {
@@ -107,34 +98,62 @@ func (handler *LocaleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if acceptLanguage == "" {
 		acceptLanguage = r.Header.Get("Accept-Language")
 	}
+
 	dirName := handler.determineLocalizedDir(acceptLanguage)
 	http.FileServer(http.Dir(dirName)).ServeHTTP(w, r)
 }
 
 func (handler *LocaleHandler) determineLocalizedDir(locale string) string {
-	assetsDir := getAssetsDir()
-	defaultDir := filepath.Join(assetsDir, defaultLocaleDir)
-	tags, _, err := language.ParseAcceptLanguage(locale)
-	if (err != nil) || (len(tags) == 0) {
-		return defaultDir
-	}
+	// TODO(floreks): Remove that once new locale codes are supported by the browsers.
+	// For backward compatibility only.
+	localeMap := strings.NewReplacer(
+		"zh-CN", "zh-Hans",
+		"zh-cn", "zh-Hans",
+		"zh-TW", "zh-Hant",
+		"zh-tw", "zh-Hant",
+		"zh-hk", "zh-Hant-HK",
+		"zh-HK", "zh-Hant-HK",
+	)
 
-	locales := handler.SupportedLocales
-	tag, _, confidence := language.NewMatcher(locales).Match(tags...)
-	matchedLocale := strings.ToLower(tag.String())
-	if confidence != language.Exact {
-		matchedLocale = ""
-		for _, l := range locales {
-			base, _ := tag.Base()
-			if l.String() == base.String() {
-				matchedLocale = l.String()
-			}
+	return handler.getLocaleDir(localeMap.Replace(locale))
+}
+
+func (handler *LocaleHandler) getLocaleDir(locale string) string {
+	localeDir := ""
+	assetsDir := getAssetsDir()
+	tags, _, _ := language.ParseAcceptLanguage(locale)
+	localeMap := handler.getLocaleMap()
+
+	for _, tag := range tags {
+		if _, exists := localeMap[tag.String()]; exists {
+			localeDir = filepath.Join(assetsDir, tag.String())
+			break
 		}
 	}
 
-	localeDir := filepath.Join(assetsDir, matchedLocale)
-	if matchedLocale != "" && dirExists(localeDir) {
+	if handler.dirExists(localeDir) {
 		return localeDir
 	}
-	return defaultDir
+
+	return filepath.Join(assetsDir, defaultLocaleDir)
+}
+
+func (handler *LocaleHandler) getLocaleMap() map[string]struct{} {
+	result := map[string]struct{}{}
+	for _, tag := range handler.SupportedLocales {
+		result[tag.String()] = struct{}{}
+	}
+
+	return result
+}
+
+func (handler *LocaleHandler) dirExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			glog.Warningf(name)
+			return false
+		}
+	}
+
+	return true
 }

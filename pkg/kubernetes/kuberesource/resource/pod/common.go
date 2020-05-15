@@ -20,10 +20,11 @@ import (
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/common"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/dataselect"
 	"hello-k8s/pkg/kubernetes/kuberesource/resource/event"
+
 	v1 "k8s.io/api/core/v1"
 )
 
-// Gets restart count of given pod (total number of its containers restarts).
+// getRestartCount return the restart count of given pod (total number of its containers restarts).
 func getRestartCount(pod v1.Pod) int32 {
 	var restartCount int32 = 0
 	for _, containerStatus := range pod.Status.ContainerStatuses {
@@ -46,7 +47,7 @@ func getPodStatus(pod v1.Pod, warnings []common.Event) PodStatus {
 	}
 }
 
-// getPodStatus returns one of three pod statuses (pending, success, failed)
+// getPodStatusPhase returns one of four pod status phases (Pending, Running, Succeeded, Failed)
 func getPodStatusPhase(pod v1.Pod, warnings []common.Event) v1.PodPhase {
 	// For terminated pods that failed
 	if pod.Status.Phase == v1.PodFailed {
@@ -79,7 +80,7 @@ func getPodStatusPhase(pod v1.Pod, warnings []common.Event) v1.PodPhase {
 		return v1.PodFailed
 	}
 
-	// Unknown?
+	// pending
 	return v1.PodPending
 }
 
@@ -95,8 +96,6 @@ func (self PodCell) GetProperty(name dataselect.PropertyName) dataselect.Compara
 		return dataselect.StdComparableTime(self.ObjectMeta.CreationTimestamp.Time)
 	case dataselect.NamespaceProperty:
 		return dataselect.StdComparableString(self.ObjectMeta.Namespace)
-	case dataselect.StatusProperty:
-		return dataselect.StdComparableString(self.Status.Phase)
 	default:
 		// if name is not supported then just return a constant dummy value, sort will have no effect.
 		return nil
