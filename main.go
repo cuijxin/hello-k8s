@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"hello-k8s/pkg/config"
-	"hello-k8s/pkg/model"
 	"hello-k8s/pkg/router"
 	"net/http"
 	"time"
@@ -27,8 +26,8 @@ func main() {
 	}
 
 	// init db
-	model.DB.Init()
-	defer model.DB.Close()
+	// model.DB.Init()
+	// defer model.DB.Close()
 
 	// Set gin mode.
 	gin.SetMode(viper.GetString("runmode"))

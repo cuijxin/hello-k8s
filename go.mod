@@ -18,12 +18,10 @@ require (
 	github.com/kubernetes/dashboard v1.10.1 // indirect
 	github.com/lexkong/log v0.0.0-20180607165131-972f9cd951fc
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
-	github.com/oracle/mysql-operator v0.0.0-20190515081336-9aebcc37a080 // indirect
 	github.com/prometheus/client_golang v1.0.0
 	github.com/shirou/gopsutil v2.20.1+incompatible
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
-	github.com/spotahome/redis-operator v1.0.0-rc.4 // indirect
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.5
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
