@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @param data body service.DeleteServiceRequest true "删除 Service 对象时所需的参数."
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/service/delete [delete]
+// @Router /v1/resource/service/delete [delete]
 func Delete(c *gin.Context) {
 	log.Info("调用删除 Service 对象的函数.")
 

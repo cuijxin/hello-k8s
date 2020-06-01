@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param data body configmap.DeleteConfigMapRequest true "删除参数"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/configmap/delete [delete]
+// @Router /v1/resource/configmap/delete [delete]
 func Delete(c *gin.Context) {
 	log.Info("调用删除 ConfigMap 对象的函数")
 

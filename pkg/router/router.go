@@ -2,6 +2,8 @@ package router
 
 import (
 	_ "hello-k8s/docs"
+	mysql5cluster "hello-k8s/pkg/api/v1/clusters/mysql5"
+	"hello-k8s/pkg/api/v1/operators/mysql5"
 	"hello-k8s/pkg/api/v1/resources/configmap"
 	"hello-k8s/pkg/api/v1/resources/container"
 	"hello-k8s/pkg/api/v1/resources/cronjob"
@@ -51,7 +53,17 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		u.POST("", user.Create)
 	}
 
-	r := g.Group("/resource")
+	a := g.Group("/v1/addon/")
+	{
+		// mysql5 operator
+		a.POST("/mysql5/operator", mysql5.InstallOperator)
+		a.DELETE("/mysql5/operator", mysql5.UnInstallOperator)
+
+		// mysql5 cluster
+		a.POST("/mysql5/cluster/create", mysql5cluster.CreateCluster)
+	}
+
+	r := g.Group("/v1/resource")
 	{
 		r.POST("/persistentvolumeclaim/create", persistentvolumeclaim.Create)
 		r.DELETE("/persistentvolumeclaim/delete", persistentvolumeclaim.Delete)

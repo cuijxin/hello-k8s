@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param data body secret.DeleteSecretRequest true "删除参数"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/secret/delete [delete]
+// @Router /v1/resource/secret/delete [delete]
 func Delete(c *gin.Context) {
 	log.Debug("调用删除 Secret 对象函数")
 

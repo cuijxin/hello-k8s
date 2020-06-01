@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"hello-k8s/pkg/config"
+	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/router"
 	"net/http"
 	"time"
@@ -25,6 +26,8 @@ func main() {
 		panic(err)
 	}
 
+	// init kubernetes client
+	client.MyClient.InitHelloK8SClient()
 	// init db
 	// model.DB.Init()
 	// defer model.DB.Close()

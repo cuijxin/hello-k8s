@@ -23,7 +23,7 @@ import (
 // @Produce json
 // @param data body persistentvolumeclaim.CreatePersistentVolumeClaimRequest true "创建PersistentVolumeClaim对象所需参数."
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/persistentvolumeclaim/create [post]
+// @Router /v1/resource/persistentvolumeclaim/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 PersistentVolumeClaim 对象的函数")
 

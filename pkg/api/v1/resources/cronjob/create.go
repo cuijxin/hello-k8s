@@ -23,7 +23,7 @@ import (
 // @Produce json
 // @param data body cronjob.CreateCronJobRequest true "创建 CronJob 对象所需参数."
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/cronjob/create [post]
+// @Router /v1/resource/cronjob/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 Job 对象的函数")
 

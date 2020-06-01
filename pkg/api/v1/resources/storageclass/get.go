@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param name path string true "StorageClass 对象名称"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/storageclass/detail/{name} [get]
+// @Router /v1/resource/storageclass/detail/{name} [get]
 func GetStorageClass(c *gin.Context) {
 	log.Debug("调用查询 StorageClass 对象的函数.")
 

@@ -22,7 +22,7 @@ import (
 // @Produce json
 // @param data body job.CreateJobRequest true "创建Job对象所需参数."
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/job/create [post]
+// @Router /v1/resource/job/create [post]
 func Create(c *gin.Context) {
 	log.Info("调用创建 Job 对象的函数")
 

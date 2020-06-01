@@ -19,7 +19,7 @@ import (
 // @param name path string true "Pod 对象名称"
 // @Param namespace path string true "命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/pod/detail/{name}/{namespace} [get]
+// @Router /v1/resource/pod/detail/{name}/{namespace} [get]
 func GetPod(c *gin.Context) {
 	log.Debug("调用获取 Pod 对象详情的函数.")
 

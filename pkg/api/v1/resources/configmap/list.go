@@ -17,7 +17,7 @@ import (
 // @Tags resource
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/configmap/list/{namespace} [get]
+// @Router /v1/resource/configmap/list/{namespace} [get]
 func GetConfigMapList(c *gin.Context) {
 	log.Info("调用获取 ConfigMap 对象列表的函数")
 
@@ -28,17 +28,17 @@ func GetConfigMapList(c *gin.Context) {
 	}
 
 	// Init kubernetes client
-	clientset, err := client.New()
-	if err != nil {
-		tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
-		return
-	}
+	// clientset, err := client.New()
+	// if err != nil {
+	// 	tool.SendResponse(c, errno.ErrCreateK8sClientSet, nil)
+	// 	return
+	// }
 
 	dsQuery := dataselect.NewDataSelectQuery(dataselect.NoPagination, dataselect.NoSort, dataselect.NoFilter, dataselect.NoMetrics)
 	namespaceMap := make([]string, 0)
 	namespaceMap = append(namespaceMap, namespace)
 	namespaceQuery := common.NewNamespaceQuery(namespaceMap)
-	list, err := configmap.GetConfigMapList(clientset, namespaceQuery, dsQuery)
+	list, err := configmap.GetConfigMapList(client.MyClient.K8sClientset, namespaceQuery, dsQuery)
 	if err != nil {
 		tool.SendResponse(c, errno.ErrGetConfigMapList, err)
 		return

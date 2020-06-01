@@ -25,7 +25,85 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/resource/configmap/create": {
+        "/v1/addon/mysql5/cluster/create": {
+            "post": {
+                "description": "创建MySQL V5集群",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "创建MySQL V5集群",
+                "parameters": [
+                    {
+                        "description": "创建 MySQL V5集群所需参数.",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mysql5.ClusterOptions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/addon/mysql5/operator": {
+            "post": {
+                "description": "在Kubernetes集群中安装 MySQL V5 Operator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "在Kubernetes集群中安装 MySQL V5 Operator.",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "从Kubernetes集群中删除MySQL V5 Operator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "从Kubernetes集群中删除MySQL V5 Operator.",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/resource/configmap/create": {
             "post": {
                 "description": "创建 ConfigMap 对象",
                 "consumes": [
@@ -59,7 +137,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/configmap/delete": {
+        "/v1/resource/configmap/delete": {
             "delete": {
                 "description": "删除指定 ConfigMap 对象",
                 "consumes": [
@@ -93,7 +171,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/configmap/detail/{name}/{namespace}": {
+        "/v1/resource/configmap/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 ConfigMap 对象的详情",
                 "consumes": [
@@ -132,7 +210,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/configmap/list/{namespace}": {
+        "/v1/resource/configmap/list/{namespace}": {
             "get": {
                 "description": "获取某一命名空间下的所有 ConfigMap 对象",
                 "tags": [
@@ -158,7 +236,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/container/logs/{namespace}/{podId}/{containerId}": {
+        "/v1/resource/container/logs/{namespace}/{podId}/{containerId}": {
             "get": {
                 "description": "获取某一 Container 对象的 Logs.",
                 "tags": [
@@ -198,7 +276,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/cronjob/create": {
+        "/v1/resource/cronjob/create": {
             "post": {
                 "description": "创建 CronJob 对象",
                 "consumes": [
@@ -232,7 +310,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/cronjob/delete": {
+        "/v1/resource/cronjob/delete": {
             "delete": {
                 "description": "删除指定 CronJob 对象",
                 "consumes": [
@@ -266,7 +344,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/cronjob/detail/{name}/{namespace}": {
+        "/v1/resource/cronjob/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 CronJob 对象的详情",
                 "consumes": [
@@ -305,7 +383,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/cronjob/list/{namespace}": {
+        "/v1/resource/cronjob/list/{namespace}": {
             "get": {
                 "description": "获取某一用户空间下的所有 CronJob 对象",
                 "tags": [
@@ -331,7 +409,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/deployment/delete": {
+        "/v1/resource/deployment/delete": {
             "delete": {
                 "description": "删除指定Deployment对象.",
                 "consumes": [
@@ -365,7 +443,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/deployment/detail/{name}/{namespace}": {
+        "/v1/resource/deployment/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Deployment 对象的详情",
                 "consumes": [
@@ -404,7 +482,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/deployment/list/{namespace}": {
+        "/v1/resource/deployment/list/{namespace}": {
             "get": {
                 "description": "获取某一用户创建的所有 Deployment 对象",
                 "tags": [
@@ -430,7 +508,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/deployment/pods/{name}/{namespace}": {
+        "/v1/resource/deployment/pods/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Deployment 对象控制的Pods列表",
                 "consumes": [
@@ -469,7 +547,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/job/create": {
+        "/v1/resource/job/create": {
             "post": {
                 "description": "创建Job对象",
                 "consumes": [
@@ -503,7 +581,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/job/delete": {
+        "/v1/resource/job/delete": {
             "delete": {
                 "description": "删除指定Job对象",
                 "consumes": [
@@ -537,7 +615,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/job/detail/{name}/{namespace}": {
+        "/v1/resource/job/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一Job对象的详情",
                 "consumes": [
@@ -576,7 +654,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/job/list/{namespace}": {
+        "/v1/resource/job/list/{namespace}": {
             "get": {
                 "description": "获取某一用户创建的所有Job对象",
                 "tags": [
@@ -602,7 +680,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/job/pods/{name}/{namespace}": {
+        "/v1/resource/job/pods/{name}/{namespace}": {
             "get": {
                 "description": "查询某一Job对象控制的Pods列表",
                 "consumes": [
@@ -641,7 +719,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/persistentvolumeclaim/create": {
+        "/v1/resource/persistentvolumeclaim/create": {
             "post": {
                 "description": "创建PersistentVolumeClaim对象",
                 "consumes": [
@@ -675,7 +753,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/persistentvolumeclaim/delete": {
+        "/v1/resource/persistentvolumeclaim/delete": {
             "delete": {
                 "description": "删除指定的PersistentVolumeClaim对象",
                 "consumes": [
@@ -709,7 +787,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/persistentvolumeclaim/detail/{name}/{namespace}": {
+        "/v1/resource/persistentvolumeclaim/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一PersistentVolumeClaim对象的详情",
                 "consumes": [
@@ -748,7 +826,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/persistentvolumeclaim/list/{namespace}": {
+        "/v1/resource/persistentvolumeclaim/list/{namespace}": {
             "get": {
                 "description": "获取某一用户创建的所有PersistentVolumeClaim对象",
                 "tags": [
@@ -774,7 +852,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/pod/container/{podId}/{namespace}": {
+        "/v1/resource/pod/container/{podId}/{namespace}": {
             "get": {
                 "description": "获取某一 Pod 中的所有容器对象.",
                 "tags": [
@@ -807,7 +885,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/pod/detail/{name}/{namespace}": {
+        "/v1/resource/pod/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Pod 对象的详情",
                 "consumes": [
@@ -846,7 +924,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/pod/list/{namespace}": {
+        "/v1/resource/pod/list/{namespace}": {
             "get": {
                 "description": "获取某一命名空间下的所有 Pod 对象",
                 "tags": [
@@ -872,7 +950,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/secret/create": {
+        "/v1/resource/secret/create": {
             "post": {
                 "description": "创建 Secret 对象",
                 "consumes": [
@@ -906,7 +984,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/secret/delete": {
+        "/v1/resource/secret/delete": {
             "delete": {
                 "description": "删除指定Secret对象",
                 "consumes": [
@@ -940,7 +1018,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/secret/detail/{name}/{namespace}": {
+        "/v1/resource/secret/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Secret 对象的详情",
                 "consumes": [
@@ -979,7 +1057,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/secret/list/{namespace}": {
+        "/v1/resource/secret/list/{namespace}": {
             "get": {
                 "description": "获取某一命名空间下的所有 Secret 对象",
                 "tags": [
@@ -1005,7 +1083,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/service/delete": {
+        "/v1/resource/service/delete": {
             "delete": {
                 "description": "删除指定 Service 对象",
                 "consumes": [
@@ -1039,7 +1117,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/service/detail/{name}/{namespace}": {
+        "/v1/resource/service/detail/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Service 对象的详情",
                 "consumes": [
@@ -1078,7 +1156,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/service/list/{namespace}": {
+        "/v1/resource/service/list/{namespace}": {
             "get": {
                 "description": "获取某一用户创建的所有 Service 对象",
                 "tags": [
@@ -1104,7 +1182,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/service/pods/{name}/{namespace}": {
+        "/v1/resource/service/pods/{name}/{namespace}": {
             "get": {
                 "description": "查询某一 Service 对象对应的Pods列表",
                 "consumes": [
@@ -1143,7 +1221,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/storageclass/detail/{name}": {
+        "/v1/resource/storageclass/detail/{name}": {
             "get": {
                 "description": "查询某一 StorageClass 对象的详情.",
                 "consumes": [
@@ -1175,7 +1253,7 @@ var doc = `{
                 }
             }
         },
-        "/resource/storageclass/list": {
+        "/v1/resource/storageclass/list": {
             "get": {
                 "description": "获取某一用户创建的所有Job对象",
                 "tags": [
@@ -1228,6 +1306,60 @@ var doc = `{
         }
     },
     "definitions": {
+        "common.ConfigMapArg": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "Items ConfigMap 对象 配置项",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.ConfigMapItem"
+                    }
+                }
+            }
+        },
+        "common.ConfigMapItem": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "description": "Key 配置项的 Key.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value 配置项的 Value. 目前只支持base64格式编码的字符串.",
+                    "type": "string"
+                }
+            }
+        },
+        "common.CustomRootPasswordArg": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "SecretValue",
+                    "type": "string"
+                }
+            }
+        },
+        "common.DataVolumeArg": {
+            "type": "object",
+            "properties": {
+                "accessModes": {
+                    "description": "AccessModes 访问模式",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "capacity": {
+                    "description": "Capacity 存储容量",
+                    "type": "number"
+                },
+                "storageClassName": {
+                    "description": "StorageClassName 存储类名称",
+                    "type": "string"
+                }
+            }
+        },
         "configmap.ConfigMapItem": {
             "type": "object",
             "properties": {
@@ -1503,6 +1635,55 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/deployment.EnvironmentVariable"
                     }
+                }
+            }
+        },
+        "mysql5.ClusterOptions": {
+            "type": "object",
+            "properties": {
+                "backupvolume": {
+                    "description": "BackupVolume 用户自定义备份数据持久化存储参数.",
+                    "type": "object",
+                    "$ref": "#/definitions/common.DataVolumeArg"
+                },
+                "clusterId": {
+                    "description": "ClusterID Kubernetes 集群ID.",
+                    "type": "string"
+                },
+                "config": {
+                    "description": "Config 用户自定义配置文件.",
+                    "type": "object",
+                    "$ref": "#/definitions/common.ConfigMapArg"
+                },
+                "datavolume": {
+                    "description": "DataVolume 用户定义持久化存储参数.",
+                    "type": "object",
+                    "$ref": "#/definitions/common.DataVolumeArg"
+                },
+                "dbName": {
+                    "description": "InitDBName 用户初始化数据库名称.",
+                    "type": "string"
+                },
+                "isExport": {
+                    "description": "IsExport 是否开放公开服务.",
+                    "type": "boolean"
+                },
+                "members": {
+                    "description": "Members MySQL集群节点数.",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name MySQL 集群名称.",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Namespace 命名空间.",
+                    "type": "string"
+                },
+                "rootpassword": {
+                    "description": "RootPassword 用户自定义root密码.",
+                    "type": "object",
+                    "$ref": "#/definitions/common.CustomRootPasswordArg"
                 }
             }
         },

@@ -19,7 +19,7 @@ import (
 // @Param name path string true "Job对象名称"
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/job/pods/{name}/{namespace} [get]
+// @Router /v1/resource/job/pods/{name}/{namespace} [get]
 func GetJobPods(c *gin.Context) {
 	log.Info("调用获取 Job 对象的 Pods 列表函数")
 

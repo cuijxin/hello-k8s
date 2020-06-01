@@ -17,7 +17,7 @@ import (
 // @Tags resource
 // @Param namespace path string true "命名空间"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/pod/list/{namespace} [get]
+// @Router /v1/resource/pod/list/{namespace} [get]
 func GetPodList(c *gin.Context) {
 	log.Info("调用获取 Pod 对象列表的函数")
 

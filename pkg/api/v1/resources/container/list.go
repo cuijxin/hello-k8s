@@ -17,7 +17,7 @@ import (
 // @Param podId path string true "Pod ID"
 // @Param namespace path string true "命名空间"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/pod/container/{podId}/{namespace} [get]
+// @Router /v1/resource/pod/container/{podId}/{namespace} [get]
 func GetPodContainers(c *gin.Context) {
 	log.Debug("调用获取某一 Pod 对象中的所有Containers对象的函数.")
 

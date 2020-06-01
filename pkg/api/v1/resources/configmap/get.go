@@ -18,7 +18,7 @@ import (
 // @Param name path string true "ConfigMap 对象名称"
 // @Param namespace path string true "用户命名空间"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/configmap/detail/{name}/{namespace} [get]
+// @Router /v1/resource/configmap/detail/{name}/{namespace} [get]
 func GetConfigMap(c *gin.Context) {
 	log.Debug("调用获取 ConfigMap 对象详情函数")
 

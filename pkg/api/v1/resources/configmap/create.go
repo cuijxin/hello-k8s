@@ -20,7 +20,7 @@ import (
 // @Produce json
 // @param data body configmap.CreateConfigMapRequest true "创建 ConfigMap 对象时所需参数"
 // @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
-// @Router /resource/configmap/create [post]
+// @Router /v1/resource/configmap/create [post]
 func Create(c *gin.Context) {
 	log.Debug("调用创建 ConfigMap 对象的函数")
 

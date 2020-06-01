@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @param data body job.DeleteJobRequest true "删除参数"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/job/delete [delete]
+// @Router /v1/resource/job/delete [delete]
 func DeleteJob(c *gin.Context) {
 	log.Info("调用删除 Job 对象的函数")
 

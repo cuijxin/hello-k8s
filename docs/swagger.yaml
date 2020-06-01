@@ -1,4 +1,41 @@
 definitions:
+  common.ConfigMapArg:
+    properties:
+      items:
+        description: Items ConfigMap 对象 配置项
+        items:
+          $ref: '#/definitions/common.ConfigMapItem'
+        type: array
+    type: object
+  common.ConfigMapItem:
+    properties:
+      key:
+        description: Key 配置项的 Key.
+        type: string
+      value:
+        description: Value 配置项的 Value. 目前只支持base64格式编码的字符串.
+        type: string
+    type: object
+  common.CustomRootPasswordArg:
+    properties:
+      value:
+        description: SecretValue
+        type: string
+    type: object
+  common.DataVolumeArg:
+    properties:
+      accessModes:
+        description: AccessModes 访问模式
+        items:
+          type: string
+        type: array
+      capacity:
+        description: Capacity 存储容量
+        type: number
+      storageClassName:
+        description: StorageClassName 存储类名称
+        type: string
+    type: object
   configmap.ConfigMapItem:
     properties:
       key:
@@ -217,6 +254,43 @@ definitions:
           $ref: '#/definitions/deployment.EnvironmentVariable'
         type: array
     type: object
+  mysql5.ClusterOptions:
+    properties:
+      backupvolume:
+        $ref: '#/definitions/common.DataVolumeArg'
+        description: BackupVolume 用户自定义备份数据持久化存储参数.
+        type: object
+      clusterId:
+        description: ClusterID Kubernetes 集群ID.
+        type: string
+      config:
+        $ref: '#/definitions/common.ConfigMapArg'
+        description: Config 用户自定义配置文件.
+        type: object
+      datavolume:
+        $ref: '#/definitions/common.DataVolumeArg'
+        description: DataVolume 用户定义持久化存储参数.
+        type: object
+      dbName:
+        description: InitDBName 用户初始化数据库名称.
+        type: string
+      isExport:
+        description: IsExport 是否开放公开服务.
+        type: boolean
+      members:
+        description: Members MySQL集群节点数.
+        type: integer
+      name:
+        description: Name MySQL 集群名称.
+        type: string
+      namespace:
+        description: Namespace 命名空间.
+        type: string
+      rootpassword:
+        $ref: '#/definitions/common.CustomRootPasswordArg'
+        description: RootPassword 用户自定义root密码.
+        type: object
+    type: object
   persistentvolumeclaim.CreatePersistentVolumeClaimRequest:
     properties:
       AccessModes:
@@ -310,7 +384,58 @@ info:
   contact: {}
   license: {}
 paths:
-  /resource/configmap/create:
+  /v1/addon/mysql5/cluster/create:
+    post:
+      consumes:
+      - application/json
+      description: 创建MySQL V5集群
+      parameters:
+      - description: 创建 MySQL V5集群所需参数.
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/mysql5.ClusterOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 创建MySQL V5集群
+      tags:
+      - add-on
+  /v1/addon/mysql5/operator:
+    delete:
+      consumes:
+      - application/json
+      description: 从Kubernetes集群中删除MySQL V5 Operator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 从Kubernetes集群中删除MySQL V5 Operator.
+      tags:
+      - add-on
+    post:
+      consumes:
+      - application/json
+      description: 在Kubernetes集群中安装 MySQL V5 Operator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 在Kubernetes集群中安装 MySQL V5 Operator.
+      tags:
+      - add-on
+  /v1/resource/configmap/create:
     post:
       consumes:
       - application/json
@@ -332,7 +457,7 @@ paths:
       summary: 创建 ConfigMap 对象
       tags:
       - resource
-  /resource/configmap/delete:
+  /v1/resource/configmap/delete:
     delete:
       consumes:
       - application/json
@@ -354,7 +479,7 @@ paths:
       summary: 删除指定 ConfigMap 对象
       tags:
       - resource
-  /resource/configmap/detail/{name}/{namespace}:
+  /v1/resource/configmap/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -380,7 +505,7 @@ paths:
       summary: 查询某一 ConfigMap 对象的详情
       tags:
       - resource
-  /resource/configmap/list/{namespace}:
+  /v1/resource/configmap/list/{namespace}:
     get:
       description: 获取某一命名空间下的所有 ConfigMap 对象
       parameters:
@@ -397,7 +522,7 @@ paths:
       summary: 获取某一命名空间下的所有 ConfigMap 对象
       tags:
       - resource
-  /resource/container/logs/{namespace}/{podId}/{containerId}:
+  /v1/resource/container/logs/{namespace}/{podId}/{containerId}:
     get:
       description: 获取某一 Container 对象的 Logs.
       parameters:
@@ -424,7 +549,7 @@ paths:
       summary: 获取某一 Container 对象的 Logs.
       tags:
       - resource
-  /resource/cronjob/create:
+  /v1/resource/cronjob/create:
     post:
       consumes:
       - application/json
@@ -446,7 +571,7 @@ paths:
       summary: 创建 CronJob 对象
       tags:
       - resource
-  /resource/cronjob/delete:
+  /v1/resource/cronjob/delete:
     delete:
       consumes:
       - application/json
@@ -468,7 +593,7 @@ paths:
       summary: 删除指定 CronJob 对象
       tags:
       - resource
-  /resource/cronjob/detail/{name}/{namespace}:
+  /v1/resource/cronjob/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -494,7 +619,7 @@ paths:
       summary: 查询某一 CronJob 对象的详情
       tags:
       - resource
-  /resource/cronjob/list/{namespace}:
+  /v1/resource/cronjob/list/{namespace}:
     get:
       description: 获取某一用户空间下的所有 CronJob 对象
       parameters:
@@ -511,7 +636,7 @@ paths:
       summary: 获取某一用户空间下的所有 CronJob 对象
       tags:
       - resource
-  /resource/deployment/delete:
+  /v1/resource/deployment/delete:
     delete:
       consumes:
       - application/json
@@ -533,7 +658,7 @@ paths:
       summary: 删除指定Deployment对象.
       tags:
       - resource
-  /resource/deployment/detail/{name}/{namespace}:
+  /v1/resource/deployment/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -559,7 +684,7 @@ paths:
       summary: 查询某一 Deployment 对象的详情
       tags:
       - resource
-  /resource/deployment/list/{namespace}:
+  /v1/resource/deployment/list/{namespace}:
     get:
       description: 获取某一用户创建的所有 Deployment 对象
       parameters:
@@ -576,7 +701,7 @@ paths:
       summary: 获取某一用户创建的所有 Deployment 对象
       tags:
       - resource
-  /resource/deployment/pods/{name}/{namespace}:
+  /v1/resource/deployment/pods/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -602,7 +727,7 @@ paths:
       summary: 查询某一 Deployment 对象控制的Pods列表
       tags:
       - resource
-  /resource/job/create:
+  /v1/resource/job/create:
     post:
       consumes:
       - application/json
@@ -624,7 +749,7 @@ paths:
       summary: 创建Job对象
       tags:
       - resource
-  /resource/job/delete:
+  /v1/resource/job/delete:
     delete:
       consumes:
       - application/json
@@ -646,7 +771,7 @@ paths:
       summary: 删除指定Job对象
       tags:
       - resource
-  /resource/job/detail/{name}/{namespace}:
+  /v1/resource/job/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -672,7 +797,7 @@ paths:
       summary: 查询某一Job对象的详情
       tags:
       - resource
-  /resource/job/list/{namespace}:
+  /v1/resource/job/list/{namespace}:
     get:
       description: 获取某一用户创建的所有Job对象
       parameters:
@@ -689,7 +814,7 @@ paths:
       summary: 获取某一用户创建的所有Job对象
       tags:
       - resource
-  /resource/job/pods/{name}/{namespace}:
+  /v1/resource/job/pods/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -715,7 +840,7 @@ paths:
       summary: 查询某一Job对象控制的Pods列表
       tags:
       - resource
-  /resource/persistentvolumeclaim/create:
+  /v1/resource/persistentvolumeclaim/create:
     post:
       consumes:
       - application/json
@@ -737,7 +862,7 @@ paths:
       summary: 创建PersistentVolumeClaim对象
       tags:
       - resource
-  /resource/persistentvolumeclaim/delete:
+  /v1/resource/persistentvolumeclaim/delete:
     delete:
       consumes:
       - application/json
@@ -759,7 +884,7 @@ paths:
       summary: 删除指定的PersistentVolumeClaim对象
       tags:
       - resource
-  /resource/persistentvolumeclaim/detail/{name}/{namespace}:
+  /v1/resource/persistentvolumeclaim/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -785,7 +910,7 @@ paths:
       summary: 查询某一PersistentVolumeClaim对象的详情
       tags:
       - resource
-  /resource/persistentvolumeclaim/list/{namespace}:
+  /v1/resource/persistentvolumeclaim/list/{namespace}:
     get:
       description: 获取某一用户创建的所有PersistentVolumeClaim对象
       parameters:
@@ -802,7 +927,7 @@ paths:
       summary: 获取某一用户创建的所有PersistentVolumeClaim对象
       tags:
       - resource
-  /resource/pod/container/{podId}/{namespace}:
+  /v1/resource/pod/container/{podId}/{namespace}:
     get:
       description: 获取某一 Pod 中的所有容器对象.
       parameters:
@@ -824,7 +949,7 @@ paths:
       summary: 获取某一 Pod 中的所有容器对象.
       tags:
       - resource
-  /resource/pod/detail/{name}/{namespace}:
+  /v1/resource/pod/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -850,7 +975,7 @@ paths:
       summary: 查询某一 Pod 对象的详情
       tags:
       - resource
-  /resource/pod/list/{namespace}:
+  /v1/resource/pod/list/{namespace}:
     get:
       description: 获取某一命名空间下的所有 Pod 对象
       parameters:
@@ -867,7 +992,7 @@ paths:
       summary: 获取某一命名空间下的所有 Pod 对象
       tags:
       - resource
-  /resource/secret/create:
+  /v1/resource/secret/create:
     post:
       consumes:
       - application/json
@@ -889,7 +1014,7 @@ paths:
       summary: 创建 Secret 对象
       tags:
       - resource
-  /resource/secret/delete:
+  /v1/resource/secret/delete:
     delete:
       consumes:
       - application/json
@@ -911,7 +1036,7 @@ paths:
       summary: 删除指定Secret对象
       tags:
       - resource
-  /resource/secret/detail/{name}/{namespace}:
+  /v1/resource/secret/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -937,7 +1062,7 @@ paths:
       summary: 查询某一 Secret 对象的详情
       tags:
       - resource
-  /resource/secret/list/{namespace}:
+  /v1/resource/secret/list/{namespace}:
     get:
       description: 获取某一命名空间下的所有 Secret 对象
       parameters:
@@ -954,7 +1079,7 @@ paths:
       summary: 获取某一命名空间下的所有 Secret 对象
       tags:
       - resource
-  /resource/service/delete:
+  /v1/resource/service/delete:
     delete:
       consumes:
       - application/json
@@ -976,7 +1101,7 @@ paths:
       summary: 删除指定 Service 对象
       tags:
       - resource
-  /resource/service/detail/{name}/{namespace}:
+  /v1/resource/service/detail/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -1002,7 +1127,7 @@ paths:
       summary: 查询某一 Service 对象的详情
       tags:
       - resource
-  /resource/service/list/{namespace}:
+  /v1/resource/service/list/{namespace}:
     get:
       description: 获取某一用户创建的所有 Service 对象
       parameters:
@@ -1019,7 +1144,7 @@ paths:
       summary: 获取某一用户创建的所有 Service 对象
       tags:
       - resource
-  /resource/service/pods/{name}/{namespace}:
+  /v1/resource/service/pods/{name}/{namespace}:
     get:
       consumes:
       - application/json
@@ -1045,7 +1170,7 @@ paths:
       summary: 查询某一 Service 对象对应的Pods列表
       tags:
       - resource
-  /resource/storageclass/detail/{name}:
+  /v1/resource/storageclass/detail/{name}:
     get:
       consumes:
       - application/json
@@ -1066,7 +1191,7 @@ paths:
       summary: 查询某一 StorageClass 对象的详情.
       tags:
       - resource
-  /resource/storageclass/list:
+  /v1/resource/storageclass/list:
     get:
       description: 获取某一用户创建的所有Job对象
       responses:

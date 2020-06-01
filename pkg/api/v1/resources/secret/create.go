@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @param data body secret.CreateSecretRequest true "创建 Secret 对象时所需参数"
 // @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
-// @Router /resource/secret/create [post]
+// @Router /v1/resource/secret/create [post]
 func Create(c *gin.Context) {
 	log.Debug("调用创建 Secret 对象的函数")
 

@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param data body deployment.DeleteDeploymentRequest true "删除一个Deployment对象时所需参数."
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/deployment/delete [delete]
+// @Router /v1/resource/deployment/delete [delete]
 func Delete(c *gin.Context) {
 	log.Info("调用删除 Deployment 对象的函数.")
 

@@ -28,7 +28,7 @@ var upGrader = websocket.Upgrader{
 // @Param podId path string true "PodID"
 // @Param containerId path string true "Container"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/container/logs/{namespace}/{podId}/{containerId} [get]
+// @Router /v1/resource/container/logs/{namespace}/{podId}/{containerId} [get]
 func GetLogs(c *gin.Context) {
 	log.Debug("获取某一 Container 对象的 Logs.")
 

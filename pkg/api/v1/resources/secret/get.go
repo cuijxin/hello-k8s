@@ -18,7 +18,7 @@ import (
 // @param name path string true "Secret 对象名称"
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/secret/detail/{name}/{namespace} [get]
+// @Router /v1/resource/secret/detail/{name}/{namespace} [get]
 func GetSecret(c *gin.Context) {
 	log.Debug("调用获取 Secret 对象详情的函数")
 

@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param data body persistentvolumeclaim.DeletePersistentVolumeClaimRequest true "删除参数"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/persistentvolumeclaim/delete [delete]
+// @Router /v1/resource/persistentvolumeclaim/delete [delete]
 func Delete(c *gin.Context) {
 	log.Info("调用删除PersistentVolumeClaim对象的函数")
 

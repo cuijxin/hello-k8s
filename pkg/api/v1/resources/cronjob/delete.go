@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @param data body cronjob.DeleteCronJobRequest true "删除参数"
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/cronjob/delete [delete]
+// @Router /v1/resource/cronjob/delete [delete]
 func DeleteCronJob(c *gin.Context) {
 	log.Debug("调用删除 CronJob 对象的函数")
 

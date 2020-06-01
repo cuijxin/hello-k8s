@@ -19,7 +19,7 @@ import (
 // @param name path string true "CronJob 对象名称"
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/cronjob/detail/{name}/{namespace} [get]
+// @Router /v1/resource/cronjob/detail/{name}/{namespace} [get]
 func GetCronJob(c *gin.Context) {
 	log.Debug("调用获取 CronJob 对象的函数")
 

@@ -19,7 +19,7 @@ import (
 // @param name path string true "Job对象名称"
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/job/detail/{name}/{namespace} [get]
+// @Router /v1/resource/job/detail/{name}/{namespace} [get]
 func GetJob(c *gin.Context) {
 	log.Debug("调用查询某一 Job 对象的函数.")
 

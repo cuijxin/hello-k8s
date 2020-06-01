@@ -19,7 +19,7 @@ import (
 // @param name path string true "PersistentVolumeClaim对象名称"
 // @Param namespace path string true "用户的命名空间"
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
-// @Router /resource/persistentvolumeclaim/detail/{name}/{namespace} [get]
+// @Router /v1/resource/persistentvolumeclaim/detail/{name}/{namespace} [get]
 func GetPersistentVolumeClaim(c *gin.Context) {
 	log.Info("调用获取 PersistentVolumeClaim 对象详情的函数")
 

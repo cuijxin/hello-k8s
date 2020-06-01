@@ -16,7 +16,7 @@ import (
 // @Description 获取某一用户创建的所有Job对象
 // @Tags resource
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
-// @Router /resource/storageclass/list [get]
+// @Router /v1/resource/storageclass/list [get]
 func GetStorageClassList(c *gin.Context) {
 	log.Debug("调用获取 StorageClass 对象列表的函数.")
 
