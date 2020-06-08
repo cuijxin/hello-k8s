@@ -7,9 +7,9 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 创建 Secret 对象
@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /v1/resource/secret/create [post]
 func Create(c *gin.Context) {
-	log.Debug("调用创建 Secret 对象的函数")
+	klog.Info("调用创建 Secret 对象的函数")
 
 	var r CreateSecretRequest
 	if err := c.BindJSON(&r); err != nil {

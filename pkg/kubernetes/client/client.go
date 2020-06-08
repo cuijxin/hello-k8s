@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 
 	mysql5Clientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
-	"github.com/lexkong/log"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/klog"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -82,9 +82,9 @@ func getKubernetesConfig() (*rest.Config, error) {
 	var kubeconfig *string
 	var tmp string
 	if home := homedir.HomeDir(); home != "" {
-		log.Infof("home dir is:%v", home)
+		klog.Infof("home dir is:%v", home)
 		tmp = filepath.Join(home, ".kube", "config-tencent")
-		log.Infof("config path is:%v", tmp)
+		klog.Infof("config path is:%v", tmp)
 		kubeconfig = &tmp
 	}
 

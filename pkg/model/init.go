@@ -3,8 +3,8 @@ package model
 import (
 	"fmt"
 
-	"github.com/lexkong/log"
 	"github.com/spf13/viper"
+	"k8s.io/klog"
 
 	// MySQL driver.
 	"github.com/jinzhu/gorm"
@@ -29,7 +29,7 @@ func openDB(username, password, addr, name string) *gorm.DB {
 		"Local")
 	db, err := gorm.Open("mysql", config)
 	if err != nil {
-		log.Errorf(err, "Database connection failed. Database name: %s", name)
+		klog.Errorf("Database connection failed. Database name: %s, %v", name, err)
 	}
 
 	// set for db connection

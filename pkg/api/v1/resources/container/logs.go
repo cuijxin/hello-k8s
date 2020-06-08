@@ -12,7 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 var upGrader = websocket.Upgrader{
@@ -30,7 +30,7 @@ var upGrader = websocket.Upgrader{
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /v1/resource/container/logs/{namespace}/{podId}/{containerId} [get]
 func GetLogs(c *gin.Context) {
-	log.Debug("获取某一 Container 对象的 Logs.")
+	klog.Info("获取某一 Container 对象的 Logs.")
 
 	namespace := c.Param("namespace")
 	podID := c.Param("podId")
@@ -49,7 +49,7 @@ func GetLogs(c *gin.Context) {
 	// 升级 get 请求为 webSocket 协议
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Errorf(err, "升级 get 请求为 webSocket 协议失败")
+		klog.Errorf("升级 get 请求为 webSocket 协议失败: %v", err)
 		tool.SendResponse(c, errno.ErrUpGraderRequest, err)
 		return
 	}
@@ -63,7 +63,7 @@ func GetLogs(c *gin.Context) {
 			podLogs, err := container.GetLogDetails(clientset, namespace, podID,
 				containerID, logs.AllSelection, false)
 			if err != nil {
-				log.Errorf(err, "获取pod[%s:%s:%s]的日志失败!", namespace, podID, containerID)
+				klog.Errorf("获取pod[%s:%s:%s]的日志失败: %v", namespace, podID, containerID, err)
 				break
 			}
 			newestLogTimestamp = string(podLogs.LogLines[len(podLogs.LogLines)-1].Timestamp)
@@ -85,7 +85,7 @@ func GetLogs(c *gin.Context) {
 			podLogs, err := container.GetLogDetails(clientset, namespace, podID,
 				containerID, selection, false)
 			if err != nil {
-				log.Errorf(err, "获取pod[%s:%s:%s]的日志失败!", namespace, podID, containerID)
+				klog.Errorf("获取pod[%s:%s:%s]的日志失败: %v", namespace, podID, containerID, err)
 				break
 			}
 			if len(podLogs.LogLines) == 0 {

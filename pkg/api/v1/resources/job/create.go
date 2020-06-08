@@ -9,10 +9,10 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	batchv1 "k8s.io/api/batch/v1"
 	api "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 创建Job对象
@@ -24,7 +24,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /v1/resource/job/create [post]
 func Create(c *gin.Context) {
-	log.Info("调用创建 Job 对象的函数")
+	klog.Info("调用创建 Job 对象的函数")
 
 	var r CreateJobRequest
 	if err := c.BindJSON(&r); err != nil {

@@ -2,8 +2,11 @@ package tool
 
 import (
 	"context"
+	"encoding/base64"
+	"hello-k8s/pkg/kubernetes/client"
 	deploy "hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
 	"hello-k8s/pkg/model"
+	"hello-k8s/pkg/model/common"
 	"hello-k8s/pkg/utils/errno"
 	"net/http"
 	"path"
@@ -11,17 +14,16 @@ import (
 	"unsafe"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	"github.com/spf13/viper"
 	"github.com/teris-io/shortid"
 	"github.com/unknwon/com"
 
 	appsv1 "k8s.io/api/apps/v1"
-	api "k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -110,7 +112,7 @@ func CreatePodSpec(name string, podSpecArgs model.PodArgs) *corev1.PodSpec {
 	if len(podSpecArgs.ConfigMaps) > 0 {
 		for _, configMapObj := range podSpecArgs.ConfigMaps {
 			configFileName := path.Base(configMapObj.MountPath)
-			volumeMount := api.VolumeMount{
+			volumeMount := corev1.VolumeMount{
 				Name:      configMapObj.Name,
 				MountPath: configMapObj.MountPath,
 				SubPath:   configFileName,
@@ -122,7 +124,7 @@ func CreatePodSpec(name string, podSpecArgs model.PodArgs) *corev1.PodSpec {
 
 	if len(podSpecArgs.PersistentVolumeClaims) > 0 {
 		for _, pvc := range podSpecArgs.PersistentVolumeClaims {
-			volumeMount := api.VolumeMount{
+			volumeMount := corev1.VolumeMount{
 				Name:      pvc.Name,
 				MountPath: pvc.MountPath,
 				ReadOnly:  pvc.ReadOnly,
@@ -162,14 +164,14 @@ func CreatePodSpec(name string, podSpecArgs model.PodArgs) *corev1.PodSpec {
 
 	if len(podSpecArgs.ConfigMaps) > 0 {
 		for _, configMapObj := range podSpecArgs.ConfigMaps {
-			configmap := api.ConfigMapVolumeSource{
-				LocalObjectReference: api.LocalObjectReference{
+			configmap := corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
 					Name: configMapObj.Name,
 				},
 			}
-			volume := api.Volume{
+			volume := corev1.Volume{
 				Name: configMapObj.Name,
-				VolumeSource: api.VolumeSource{
+				VolumeSource: corev1.VolumeSource{
 					ConfigMap: &configmap,
 				},
 			}
@@ -179,9 +181,9 @@ func CreatePodSpec(name string, podSpecArgs model.PodArgs) *corev1.PodSpec {
 
 	if len(podSpecArgs.PersistentVolumeClaims) > 0 {
 		for _, pvc := range podSpecArgs.PersistentVolumeClaims {
-			volume := api.Volume{
+			volume := corev1.Volume{
 				Name: pvc.Name,
-				VolumeSource: api.VolumeSource{
+				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 						ClaimName: pvc.Name,
 					},
@@ -260,20 +262,20 @@ func InitClusterRoleBinding(subjectKind, RoleRefKind, name, serviceaccountName, 
 
 // CheckMySQLClusterRBAC 检查MySQL集群RBAC对象的函数.
 func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleName string, clientset kubernetes.Interface) error {
-	log.Debugf("check mysql serviceaccount object.")
+	klog.Info("check mysql serviceaccount object.")
 	_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(context.TODO(), serviceaccountName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
-		log.Debugf("create mysql agent serviceaccount object.")
+		klog.Info("create mysql agent serviceaccount object.")
 		sa := NewServiceAccount(serviceaccountName)
 		if _, err = clientset.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
 			return err
 		}
 	}
 
-	log.Debugf("check mysql rolebinding object.")
+	klog.Info("check mysql rolebinding object.")
 	_, err = clientset.RbacV1().RoleBindings(namespace).Get(context.TODO(), roleName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
-		log.Debugf("create mysql agent rolebinding object.")
+		klog.Info("create mysql agent rolebinding object.")
 		rb := &rbacv1.RoleBinding{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
@@ -319,4 +321,90 @@ func GetReqID(c *gin.Context) string {
 		return requestId
 	}
 	return ""
+}
+
+func NewConfigMap(name string, r *common.ConfigMapArg) *corev1.ConfigMap {
+	klog.Info("创建用户自定义配置文件对应的 ConfigMap 对象.")
+	configmap := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+
+	if len(r.Items) > 0 {
+		tmp := make(map[string]string)
+		for _, item := range r.Items {
+			d, _ := base64.StdEncoding.DecodeString(item.Value)
+			str := String(d)
+			tmp[item.Key] = str
+		}
+		configmap.Data = tmp
+	}
+
+	return &configmap
+}
+
+func DestoryConfigMap(namespace, name string) {
+	client.MyClient.K8sClientset.CoreV1().ConfigMaps(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+}
+
+func NewSecret(name string, r *common.CustomRootPasswordArg) *corev1.Secret {
+	secret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+
+	if len(r.SecretValue) > 0 {
+		tmp := make(map[string]string)
+		tmp["password"] = r.SecretValue
+
+		secret.StringData = tmp
+	}
+
+	secret.Type = "Opaque"
+
+	return &secret
+}
+
+func DestorySecret(namespace, name string) {
+	client.MyClient.K8sClientset.CoreV1().Secrets(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+}
+
+func DestoryService(namespace, name string) {
+	client.MyClient.K8sClientset.CoreV1().Services(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+}
+
+func NewVolumeClaimTemplate(name string, r *common.DataVolumeArg) *corev1.PersistentVolumeClaim {
+	template := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	for _, accessMode := range r.AccessModes {
+		var mode corev1.PersistentVolumeAccessMode
+		switch accessMode {
+		case "ReadWriteOnce":
+			mode = corev1.ReadWriteOnce
+		case "ReadOnlyMany":
+			mode = corev1.ReadOnlyMany
+		case "ReadWriteMany":
+			mode = corev1.ReadWriteMany
+		default:
+			mode = corev1.ReadWriteMany
+		}
+		template.Spec.AccessModes = append(template.Spec.AccessModes, mode)
+	}
+
+	template.Spec.StorageClassName = r.StorageClassName
+
+	in := strconv.FormatFloat(r.Capacity, 'f', 5, 32)
+	capacity := in + viper.GetString("constants.storage_unit")
+	request, _ := resource.ParseQuantity(capacity)
+	template.Spec.Resources = corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceStorage: request,
+		},
+	}
+	return template
 }

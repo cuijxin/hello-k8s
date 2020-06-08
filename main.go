@@ -5,13 +5,15 @@ import (
 	"hello-k8s/pkg/config"
 	"hello-k8s/pkg/kubernetes/client"
 	"hello-k8s/pkg/router"
+	"hello-k8s/pkg/storage/database"
+	"hello-k8s/pkg/storage/mongo"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"k8s.io/klog"
 )
 
 var (
@@ -26,11 +28,18 @@ func main() {
 		panic(err)
 	}
 
+	database.DB = &mongo.MongoDB{}
+	if err := database.DB.Init(database.DBInitOptions{
+		User:     viper.GetString("db.mongodb.user"),
+		Password: viper.GetString("db.mongodb.password"),
+		Address:  viper.GetString("db.mongodb.addr"),
+	}); err != nil {
+		klog.Errorf("failed to connect db server: %v", err)
+		panic(err)
+	}
+
 	// init kubernetes client
 	client.MyClient.InitHelloK8SClient()
-	// init db
-	// model.DB.Init()
-	// defer model.DB.Close()
 
 	// Set gin mode.
 	gin.SetMode(viper.GetString("runmode"))
@@ -53,14 +62,14 @@ func main() {
 	// Ping the server to make sure the router is working.
 	go func() {
 		if err := pingServer(); err != nil {
-			log.Fatal("The router has no response, or it might took too long to start up.", err)
+			klog.Fatalf("The router has no response, or it might took too long to start up: %v", err)
 		}
 
-		log.Info("The router has been deployed successfully.")
+		klog.Info("The router has been deployed successfully.")
 	}()
 
-	log.Infof("Start to listening the incoming requests on http address: %s", viper.GetString("addr"))
-	log.Info(http.ListenAndServe(viper.GetString("addr"), g).Error())
+	klog.Infof("Start to listening the incoming requests on http address: %s", viper.GetString("addr"))
+	klog.Info(http.ListenAndServe(viper.GetString("addr"), g).Error())
 }
 
 // pingServer pings the http server to make sure the router is working.
@@ -73,7 +82,7 @@ func pingServer() error {
 		}
 
 		// Sleep for a second to continue the next ping.
-		log.Info("Waiting for the router, retry in 1 second.")
+		klog.Info("Waiting for the router, retry in 1 second.")
 		time.Sleep(time.Second)
 	}
 	return errors.New("Cannot connect to the router.")

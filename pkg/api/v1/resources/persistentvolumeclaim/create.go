@@ -9,11 +9,11 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 创建PersistentVolumeClaim对象
@@ -25,7 +25,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /v1/resource/persistentvolumeclaim/create [post]
 func Create(c *gin.Context) {
-	log.Info("调用创建 PersistentVolumeClaim 对象的函数")
+	klog.Info("调用创建 PersistentVolumeClaim 对象的函数")
 
 	var r CreatePersistentVolumeClaimRequest
 	if err := c.BindJSON(&r); err != nil {
@@ -68,7 +68,7 @@ func newPersistentVolumeClaim(r CreatePersistentVolumeClaimRequest) *v1.Persiste
 	if r.StorageCapacity > 0 {
 		in := strconv.FormatFloat(r.StorageCapacity, 'f', 5, 32)
 		capacity := in + viper.GetString("constants.storage_unit")
-		log.Debugf("capacity is %s", capacity)
+		klog.Infof("capacity is %s", capacity)
 		request, _ := resource.ParseQuantity(capacity)
 		spec.Resources = v1.ResourceRequirements{
 			Requests: v1.ResourceList{

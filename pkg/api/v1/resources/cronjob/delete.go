@@ -7,8 +7,8 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 删除指定 CronJob 对象
@@ -20,7 +20,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /v1/resource/cronjob/delete [delete]
 func DeleteCronJob(c *gin.Context) {
-	log.Debug("调用删除 CronJob 对象的函数")
+	klog.Info("调用删除 CronJob 对象的函数")
 
 	var r DeleteCronJobRequest
 	if err := c.BindJSON(&r); err != nil {

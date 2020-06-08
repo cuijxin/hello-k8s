@@ -36,3 +36,36 @@ type ClusterOptions struct {
 	// BackupVolume 用户自定义备份数据持久化存储参数.
 	BackupVolume *common.DataVolumeArg `json:"backupvolume,omitempty"`
 }
+
+// ClusterInfo MySQL V5集群信息
+type ClusterInfo struct {
+	// Name MySQL集群名称
+	Name string `json:"name"`
+
+	// Namespace 命名空间
+	Namespace string `json:"namespace"`
+
+	// Kubernetes 集群ID
+	ClusterID string `json:"clusterId"`
+
+	// RootUserName
+	RootUserName string `json:"root"`
+
+	// RootPassword root密码
+	RootPassword string `json:"password,omitempty"`
+
+	// InitDBName 初始数据库
+	InitDBName string `json:"dbname,omitempty"`
+
+	// Host mysql服务名
+	Host string `json:"host"`
+
+	// Port mysql服务端口
+	Port int32 `json:"port"`
+
+	// Domain mysql服务访问域名
+	Domain string `json:"domain"`
+
+	// Status mysql集群运行状态
+	Status common.ServiceStatus `json:"status,omitempty"`
+}

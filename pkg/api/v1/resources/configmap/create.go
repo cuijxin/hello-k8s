@@ -8,9 +8,9 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 创建 ConfigMap 对象
@@ -22,7 +22,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /v1/resource/configmap/create [post]
 func Create(c *gin.Context) {
-	log.Debug("调用创建 ConfigMap 对象的函数")
+	klog.Info("调用创建 ConfigMap 对象的函数")
 
 	var r CreateConfigMapRequest
 	if err := c.BindJSON(&r); err != nil {
@@ -50,8 +50,6 @@ func Create(c *gin.Context) {
 }
 
 func newConfigMap(r CreateConfigMapRequest) *v1.ConfigMap {
-	log.Debug("init configmap object.")
-
 	configmap := v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.Name,

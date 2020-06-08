@@ -8,7 +8,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 // @Summary 查询某一 StorageClass 对象的详情.
@@ -20,7 +20,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /v1/resource/storageclass/detail/{name} [get]
 func GetStorageClass(c *gin.Context) {
-	log.Debug("调用查询 StorageClass 对象的函数.")
+	klog.Info("调用查询 StorageClass 对象的函数.")
 
 	name := c.Param("name")
 	if name == "" {

@@ -8,7 +8,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 // @Summary 查询某一 Deployment 对象控制的Pods列表
@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /v1/resource/deployment/pods/{name}/{namespace} [get]
 func GetDeploymentPods(c *gin.Context) {
-	log.Info("调用获取 Deployment 对象的 Pods 列表函数")
+	klog.Info("调用获取 Deployment 对象的 Pods 列表函数")
 
 	name := c.Param("name")
 	namespace := c.Param("namespace")

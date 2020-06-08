@@ -8,8 +8,8 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // @Summary 删除指定 Service 对象
@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /v1/resource/service/delete [delete]
 func Delete(c *gin.Context) {
-	log.Info("调用删除 Service 对象的函数.")
+	klog.Info("调用删除 Service 对象的函数.")
 
 	var r DeleteServiceRequest
 	if err := c.BindJSON(&r); err != nil {

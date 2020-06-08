@@ -9,7 +9,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 // @Summary 获取某一用户空间下的所有 CronJob 对象
@@ -19,7 +19,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /v1/resource/cronjob/list/{namespace} [get]
 func GetCronJobList(c *gin.Context) {
-	log.Info("调用获取 CronJob 对象列表的函数")
+	klog.Info("调用获取 CronJob 对象列表的函数")
 
 	namespace := c.Param("namespace")
 	if namespace == "" {

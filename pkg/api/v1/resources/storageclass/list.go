@@ -9,7 +9,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 // @Summary 获取所有 StorageClass 对象列表.
@@ -18,7 +18,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200,"message":"OK","data":{""}}"
 // @Router /v1/resource/storageclass/list [get]
 func GetStorageClassList(c *gin.Context) {
-	log.Debug("调用获取 StorageClass 对象列表的函数.")
+	klog.Info("调用获取 StorageClass 对象列表的函数.")
 
 	// Init kubernetes client
 	clientset, err := client.New()

@@ -8,7 +8,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
+	"k8s.io/klog"
 )
 
 // @Summary  查询某一 Service 对象的详情
@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":200, "message":"OK", "data":{""}}"
 // @Router /v1/resource/service/detail/{name}/{namespace} [get]
 func GetService(c *gin.Context) {
-	log.Info("调用创建 Service 对象的函数")
+	klog.Info("调用创建 Service 对象的函数")
 
 	name := c.Param("name")
 	namespace := c.Param("namespace")

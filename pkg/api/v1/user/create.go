@@ -6,8 +6,7 @@ import (
 	"hello-k8s/pkg/utils/tool"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lexkong/log"
-	"github.com/lexkong/log/lager"
+	"k8s.io/klog"
 )
 
 // @Summary 创建 User 对象
@@ -19,7 +18,7 @@ import (
 // @Success 200 {object} tool.Response "{"code":0,"message":"OK","data":{""}}"
 // @Router /v1/user [post]
 func Create(c *gin.Context) {
-	log.Debug("调用创建用户的接口！", lager.Data{"X-Request-Id": tool.GetReqID(c)})
+	klog.Info("调用创建用户的接口")
 	var r CreateRequest
 	if err := c.Bind(&r); err != nil {
 		tool.SendResponse(c, errno.ErrBind, nil)
