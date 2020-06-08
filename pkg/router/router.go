@@ -4,6 +4,7 @@ import (
 	_ "hello-k8s/docs"
 	mysql5cluster "hello-k8s/pkg/api/v1/clusters/mysql5"
 	"hello-k8s/pkg/api/v1/operators/mysql5"
+	"hello-k8s/pkg/api/v1/operators/postgres"
 	"hello-k8s/pkg/api/v1/resources/configmap"
 	"hello-k8s/pkg/api/v1/resources/container"
 	"hello-k8s/pkg/api/v1/resources/cronjob"
@@ -61,6 +62,10 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 
 		// mysql5 cluster
 		a.POST("/mysql5/cluster/create", mysql5cluster.CreateCluster)
+		a.DELETE("/mysql5/cluster/delete", mysql5cluster.DeleteCluster)
+
+		a.POST("/postgres/operator", postgres.InstallOperator)
+		a.DELETE("/postgres/operator", postgres.UnInstallOperator)
 	}
 
 	r := g.Group("/v1/resource")

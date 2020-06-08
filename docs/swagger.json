@@ -39,6 +39,40 @@
                 }
             }
         },
+        "/v1/addon/mysql5/cluster/delete": {
+            "delete": {
+                "description": "删除指定的MySQL V5集群",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "删除指定的MySQL V5集群",
+                "parameters": [
+                    {
+                        "description": "删除参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mysql5.DeleteClusterOptions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/addon/mysql5/operator": {
             "post": {
                 "description": "在Kubernetes集群中安装 MySQL V5 Operator.",
@@ -73,6 +107,50 @@
                     "add-on"
                 ],
                 "summary": "从Kubernetes集群中删除MySQL V5 Operator.",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/addon/postgres/operator": {
+            "post": {
+                "description": "在Kubernetes集群中安装 Postgres Operator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "在Kubernetes集群中安装 Postgres Operator.",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "从Kubernetes集群中删除Postgres Operator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "从Kubernetes集群中删除Postgres Operator.",
                 "responses": {
                     "200": {
                         "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
@@ -1664,6 +1742,23 @@
                     "description": "RootPassword 用户自定义root密码.",
                     "type": "object",
                     "$ref": "#/definitions/common.CustomRootPasswordArg"
+                }
+            }
+        },
+        "mysql5.DeleteClusterOptions": {
+            "type": "object",
+            "properties": {
+                "clusterId": {
+                    "description": "Kubernetes 集群ID.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "MySQL 集群名称.",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Namespace 命名空间.",
+                    "type": "string"
                 }
             }
         },

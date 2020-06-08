@@ -37,6 +37,17 @@ type ClusterOptions struct {
 	BackupVolume *common.DataVolumeArg `json:"backupvolume,omitempty"`
 }
 
+type DeleteClusterOptions struct {
+	// MySQL 集群名称.
+	Name string `json:"name"`
+
+	// Namespace 命名空间.
+	Namespace string `json:"namespace"`
+
+	// Kubernetes 集群ID.
+	ClusterID string `json:"clusterId"`
+}
+
 // ClusterInfo MySQL V5集群信息
 type ClusterInfo struct {
 	// Name MySQL集群名称

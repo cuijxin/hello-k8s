@@ -291,6 +291,18 @@ definitions:
         description: RootPassword 用户自定义root密码.
         type: object
     type: object
+  mysql5.DeleteClusterOptions:
+    properties:
+      clusterId:
+        description: Kubernetes 集群ID.
+        type: string
+      name:
+        description: MySQL 集群名称.
+        type: string
+      namespace:
+        description: Namespace 命名空间.
+        type: string
+    type: object
   persistentvolumeclaim.CreatePersistentVolumeClaimRequest:
     properties:
       AccessModes:
@@ -406,6 +418,28 @@ paths:
       summary: 创建MySQL V5集群
       tags:
       - add-on
+  /v1/addon/mysql5/cluster/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定的MySQL V5集群
+      parameters:
+      - description: 删除参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/mysql5.DeleteClusterOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 删除指定的MySQL V5集群
+      tags:
+      - add-on
   /v1/addon/mysql5/operator:
     delete:
       consumes:
@@ -433,6 +467,35 @@ paths:
           schema:
             $ref: '#/definitions/tool.Response'
       summary: 在Kubernetes集群中安装 MySQL V5 Operator.
+      tags:
+      - add-on
+  /v1/addon/postgres/operator:
+    delete:
+      consumes:
+      - application/json
+      description: 从Kubernetes集群中删除Postgres Operator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 从Kubernetes集群中删除Postgres Operator.
+      tags:
+      - add-on
+    post:
+      consumes:
+      - application/json
+      description: 在Kubernetes集群中安装 Postgres Operator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 在Kubernetes集群中安装 Postgres Operator.
       tags:
       - add-on
   /v1/resource/configmap/create:

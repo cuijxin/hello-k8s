@@ -5,12 +5,14 @@ import (
 	"encoding/base64"
 	"hello-k8s/pkg/kubernetes/client"
 	deploy "hello-k8s/pkg/kubernetes/kuberesource/resource/deployment"
+	"hello-k8s/pkg/kubernetes/kuberesource/resource/statefulset"
 	"hello-k8s/pkg/model"
 	"hello-k8s/pkg/model/common"
 	"hello-k8s/pkg/utils/errno"
 	"net/http"
 	"path"
 	"strconv"
+	"time"
 	"unsafe"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +29,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -261,19 +264,19 @@ func InitClusterRoleBinding(subjectKind, RoleRefKind, name, serviceaccountName, 
 }
 
 // CheckMySQLClusterRBAC 检查MySQL集群RBAC对象的函数.
-func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleName string, clientset kubernetes.Interface) error {
+func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleName string) error {
 	klog.Info("check mysql serviceaccount object.")
-	_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(context.TODO(), serviceaccountName, metav1.GetOptions{})
+	_, err := client.MyClient.K8sClientset.CoreV1().ServiceAccounts(namespace).Get(context.TODO(), serviceaccountName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		klog.Info("create mysql agent serviceaccount object.")
 		sa := NewServiceAccount(serviceaccountName)
-		if _, err = clientset.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
+		if _, err = client.MyClient.K8sClientset.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), sa, metav1.CreateOptions{}); err != nil {
 			return err
 		}
 	}
 
 	klog.Info("check mysql rolebinding object.")
-	_, err = clientset.RbacV1().RoleBindings(namespace).Get(context.TODO(), roleName, metav1.GetOptions{})
+	_, err = client.MyClient.K8sClientset.RbacV1().RoleBindings(namespace).Get(context.TODO(), roleName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		klog.Info("create mysql agent rolebinding object.")
 		rb := &rbacv1.RoleBinding{
@@ -292,9 +295,61 @@ func CheckMySQLClusterRBAC(namespace, serviceaccountName, roleName, clusterRoleN
 			Name:      serviceaccountName,
 			Namespace: namespace,
 		})
-		if _, err = clientset.RbacV1().RoleBindings(namespace).Create(context.TODO(), rb, metav1.CreateOptions{}); err != nil {
+		if _, err = client.MyClient.K8sClientset.RbacV1().RoleBindings(namespace).Create(context.TODO(), rb, metav1.CreateOptions{}); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func NewVolumeClaimTemplate(name string, r *common.DataVolumeArg) *corev1.PersistentVolumeClaim {
+	template := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	for _, accessMode := range r.AccessModes {
+		var mode corev1.PersistentVolumeAccessMode
+		switch accessMode {
+		case "ReadWriteOnce":
+			mode = corev1.ReadWriteOnce
+		case "ReadOnlyMany":
+			mode = corev1.ReadOnlyMany
+		case "ReadWriteMany":
+			mode = corev1.ReadWriteMany
+		default:
+			mode = corev1.ReadWriteMany
+		}
+		template.Spec.AccessModes = append(template.Spec.AccessModes, mode)
+	}
+
+	template.Spec.StorageClassName = r.StorageClassName
+
+	in := strconv.FormatFloat(r.Capacity, 'f', 5, 32)
+	capacity := in + viper.GetString("constants.storage_unit")
+	request, _ := resource.ParseQuantity(capacity)
+	template.Spec.Resources = corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceStorage: request,
+		},
+	}
+	return template
+}
+
+func WaitForStatefulsetReady(name, namespace string) (err error) {
+	err = wait.PollImmediate(100*time.Millisecond, 10*time.Minute, func() (done bool, err error) {
+		detail, err := statefulset.GetStatefulSetDetail(client.MyClient.K8sClientset, nil, namespace, name)
+		if err != nil {
+			klog.Errorf("获取Statefulset对象[%s:%s]详情失败: %v", namespace, name, err)
+			return false, err
+		}
+		if detail.Pods.Running > 0 && *detail.Pods.Desired == detail.Pods.Running {
+			return true, nil
+		}
+		return false, nil
+	})
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -344,10 +399,6 @@ func NewConfigMap(name string, r *common.ConfigMapArg) *corev1.ConfigMap {
 	return &configmap
 }
 
-func DestoryConfigMap(namespace, name string) {
-	client.MyClient.K8sClientset.CoreV1().ConfigMaps(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-}
-
 func NewSecret(name string, r *common.CustomRootPasswordArg) *corev1.Secret {
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -367,44 +418,74 @@ func NewSecret(name string, r *common.CustomRootPasswordArg) *corev1.Secret {
 	return &secret
 }
 
-func DestorySecret(namespace, name string) {
-	client.MyClient.K8sClientset.CoreV1().Secrets(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+func DestoryConfigMap(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.CoreV1().ConfigMaps(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除configmap对象[%s:%s]失败.", namespace, name, err)
+		return
+	}
+	return
 }
 
-func DestoryService(namespace, name string) {
-	client.MyClient.K8sClientset.CoreV1().Services(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+func DestorySecret(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.CoreV1().Secrets(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除secret对象[%s:%s]失败.", namespace, name, err)
+		return
+	}
+	return
 }
 
-func NewVolumeClaimTemplate(name string, r *common.DataVolumeArg) *corev1.PersistentVolumeClaim {
-	template := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
+func DestoryService(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.CoreV1().Services(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除service对象[%s:%s]失败.", namespace, name, err)
+		return
 	}
-	for _, accessMode := range r.AccessModes {
-		var mode corev1.PersistentVolumeAccessMode
-		switch accessMode {
-		case "ReadWriteOnce":
-			mode = corev1.ReadWriteOnce
-		case "ReadOnlyMany":
-			mode = corev1.ReadOnlyMany
-		case "ReadWriteMany":
-			mode = corev1.ReadWriteMany
-		default:
-			mode = corev1.ReadWriteMany
-		}
-		template.Spec.AccessModes = append(template.Spec.AccessModes, mode)
-	}
+	return
+}
 
-	template.Spec.StorageClassName = r.StorageClassName
-
-	in := strconv.FormatFloat(r.Capacity, 'f', 5, 32)
-	capacity := in + viper.GetString("constants.storage_unit")
-	request, _ := resource.ParseQuantity(capacity)
-	template.Spec.Resources = corev1.ResourceRequirements{
-		Requests: corev1.ResourceList{
-			corev1.ResourceStorage: request,
-		},
+func DestoryPVC(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除pvc对象[%s:%s]失败.", namespace, name, err)
+		return
 	}
-	return template
+	return
+}
+
+func DestoryServiceAccount(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.CoreV1().ServiceAccounts(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除serviceAccount对象[%s:%s]失败.", namespace, name, err)
+		return
+	}
+	return
+}
+
+func DestoryClusterRole(name string) (err error) {
+	err = client.MyClient.K8sClientset.RbacV1().ClusterRoles().Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除clusterRole对象[%s]失败.", name, err)
+		return
+	}
+	return
+}
+
+func DestoryClusterRoleBinding(name string) (err error) {
+	err = client.MyClient.K8sClientset.RbacV1().ClusterRoleBindings().Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除clusterRoleBinding对象[%s]失败.", name, err)
+		return
+	}
+	return nil
+}
+
+func DestoryDeployment(namespace, name string) (err error) {
+	err = client.MyClient.K8sClientset.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		klog.Errorf("删除deployment对象[%s:%s]失败.", namespace, name, err)
+		return
+	}
+	return
 }

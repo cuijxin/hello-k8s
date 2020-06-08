@@ -62,6 +62,8 @@ func CreateCluster(c *gin.Context) {
 
 	tool.CreateNamespace(r.Namespace, client.MyClient.K8sClientset)
 	klog.Info("命名空间检查执行完毕......")
+	tool.CheckMySQLClusterRBAC(r.Namespace, "mysql-agent", "mysql-agent", "mysql5-operator")
+	klog.Info("检查mysql rbac对象完毕......")
 
 	// 处理用户自定义配置文件
 	if r.Config != nil {
@@ -173,6 +175,12 @@ func CreateCluster(c *gin.Context) {
 			tool.SendResponse(c, err, nil)
 			return
 		}
+	}
+
+	if err := tool.WaitForStatefulsetReady(r.Name, r.Namespace); err != nil {
+		klog.Errorf("获取Statefulset对象 [%s:%s] 状态失败.", r.Namespace, r.Name, err)
+		tool.SendResponse(c, errno.InternalServerError, nil)
+		return
 	}
 
 	tool.SendResponse(c, errno.OK, mysqlCluster)
