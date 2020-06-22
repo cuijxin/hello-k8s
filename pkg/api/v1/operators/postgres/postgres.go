@@ -32,7 +32,7 @@ var _ addons.AddOn = &PostgresOperator{}
 func New() *PostgresOperator {
 	return &PostgresOperator{
 		Namespace:              "postgres-operator",
-		Image:                  "cuijx/postgres-operator:v1.5.0",
+		Image:                  "cuijx/postgres-operator:94a1a62-dirty",
 		ConfigMapName:          "postgres-operator",
 		ServiceAccountName:     "postgres-operator",
 		ClusterRoleName:        "postgres-operator",

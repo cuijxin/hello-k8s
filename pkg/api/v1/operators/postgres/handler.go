@@ -27,7 +27,10 @@ func InstallOperator(c *gin.Context) {
 		return
 	}
 
+	klog.Info("Postgres Operator安装成功.")
+
 	tool.SendResponse(c, errno.OK, nil)
+
 	return
 }
 

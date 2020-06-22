@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	mysql5Clientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	pgClientset "github.com/cuijxin/postgres-operator-atom/pkg/generated/clientset/versioned"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/klog"
 
@@ -21,6 +22,7 @@ type HelloK8SClient struct {
 	ApiExtensionsClient *apiextensionsclientset.Clientset
 
 	Mysql5Client mysql5Clientset.Interface
+	PgClient     pgClientset.Interface
 }
 
 func (c *HelloK8SClient) InitHelloK8SClient() {
@@ -42,11 +44,17 @@ func (c *HelloK8SClient) InitHelloK8SClient() {
 		panic(err)
 	}
 
+	postgresqlClient, err := pgClientset.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
 	MyClient = &HelloK8SClient{
 		KubeConfig:          config,
 		K8sClientset:        client,
 		ApiExtensionsClient: apiExtensionsClient,
 		Mysql5Client:        mysql5client,
+		PgClient:            postgresqlClient,
 	}
 }
 

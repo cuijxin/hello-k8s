@@ -332,6 +332,53 @@ definitions:
         description: Namespace 命名空间.
         type: string
     type: object
+  postgres.CreateClusterOptions:
+    properties:
+      clusterId:
+        type: string
+      databases:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      pgparams:
+        $ref: '#/definitions/postgres.PostgresqlParam'
+        type: object
+      replicas:
+        type: integer
+      teamId:
+        type: string
+      users:
+        additionalProperties:
+          $ref: '#/definitions/postgres.UserFlags'
+        type: object
+      volume:
+        $ref: '#/definitions/postgres.Volume'
+        type: object
+    type: object
+  postgres.PostgresqlParam:
+    properties:
+      parameters:
+        additionalProperties:
+          type: string
+        type: object
+      version:
+        type: string
+    type: object
+  postgres.UserFlags:
+    items:
+      type: string
+    type: array
+  postgres.Volume:
+    properties:
+      size:
+        type: string
+      storageClass:
+        type: string
+    type: object
   secret.CreateSecretRequest:
     properties:
       item:
@@ -496,6 +543,28 @@ paths:
           schema:
             $ref: '#/definitions/tool.Response'
       summary: 在Kubernetes集群中安装 Postgres Operator.
+      tags:
+      - add-on
+  /v1/addon/postgresql/cluster/create:
+    post:
+      consumes:
+      - application/json
+      description: 创建 Postgresql 集群
+      parameters:
+      - description: 创建 Postgresql 集群参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/postgres.CreateClusterOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 创建 Postgresql 集群
       tags:
       - add-on
   /v1/resource/configmap/create:

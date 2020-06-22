@@ -3,6 +3,7 @@ package router
 import (
 	_ "hello-k8s/docs"
 	mysql5cluster "hello-k8s/pkg/api/v1/clusters/mysql5"
+	pgcluster "hello-k8s/pkg/api/v1/clusters/postgres"
 	"hello-k8s/pkg/api/v1/operators/mysql5"
 	"hello-k8s/pkg/api/v1/operators/postgres"
 	"hello-k8s/pkg/api/v1/resources/configmap"
@@ -64,8 +65,12 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		a.POST("/mysql5/cluster/create", mysql5cluster.CreateCluster)
 		a.DELETE("/mysql5/cluster/delete", mysql5cluster.DeleteCluster)
 
+		// postgres-operator
 		a.POST("/postgres/operator", postgres.InstallOperator)
 		a.DELETE("/postgres/operator", postgres.UnInstallOperator)
+
+		// postgres-cluster
+		a.POST("/postgresql/cluster/create", pgcluster.CreateCluster)
 	}
 
 	r := g.Group("/v1/resource")

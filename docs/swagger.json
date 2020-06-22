@@ -161,6 +161,40 @@
                 }
             }
         },
+        "/v1/addon/postgresql/cluster/create": {
+            "post": {
+                "description": "创建 Postgresql 集群",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "add-on"
+                ],
+                "summary": "创建 Postgresql 集群",
+                "parameters": [
+                    {
+                        "description": "创建 Postgresql 集群参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/postgres.CreateClusterOptions"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/resource/configmap/create": {
             "post": {
                 "description": "创建 ConfigMap 对象",
@@ -1799,6 +1833,77 @@
                 },
                 "namespace": {
                     "description": "Namespace 命名空间.",
+                    "type": "string"
+                }
+            }
+        },
+        "postgres.CreateClusterOptions": {
+            "type": "object",
+            "properties": {
+                "clusterId": {
+                    "type": "string"
+                },
+                "databases": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "pgparams": {
+                    "type": "object",
+                    "$ref": "#/definitions/postgres.PostgresqlParam"
+                },
+                "replicas": {
+                    "type": "integer"
+                },
+                "teamId": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/postgres.UserFlags"
+                    }
+                },
+                "volume": {
+                    "type": "object",
+                    "$ref": "#/definitions/postgres.Volume"
+                }
+            }
+        },
+        "postgres.PostgresqlParam": {
+            "type": "object",
+            "properties": {
+                "parameters": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "postgres.UserFlags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "postgres.Volume": {
+            "type": "object",
+            "properties": {
+                "size": {
+                    "type": "string"
+                },
+                "storageClass": {
                     "type": "string"
                 }
             }
