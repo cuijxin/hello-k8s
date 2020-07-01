@@ -183,6 +183,7 @@ func newConfigMap(name string) *corev1.ConfigMap {
 			"db_hosted_zone":               "db.example.com",
 			"debug_logging":                "true",
 			"docker_image":                 "cuijx/spilo-12:1.6-p3",
+			"enable_crd_validation":        "false",
 			"enable_master_load_balancer":  "false",
 			"enable_replica_load_balancer": "false",
 			"enable_teams_api":             "false",

@@ -93,8 +93,7 @@ func newPostgresCluster(r CreateClusterOptions) *acidv1.Postgresql {
 		spec.Volume = volume
 	} else {
 		volume := acidv1.Volume{
-			Size:         "1Gi",
-			StorageClass: "standard",
+			Size: "1Gi",
 		}
 		spec.Volume = volume
 	}
