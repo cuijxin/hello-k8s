@@ -1,11 +1,31 @@
 package config
 
 import (
+	"context"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/gofrs/flock"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/klog"
+	"sigs.k8s.io/yaml"
+)
+
+type HelmConfig struct {
+	HelmRepos []*repo.Entry
+}
+
+var (
+	settings   = cli.New()
+	helmConfig = &HelmConfig{}
 )
 
 type Config struct {
@@ -19,6 +39,11 @@ func Init(cfg string) error {
 
 	// 初始化配置文件
 	if err := c.initConfig(); err != nil {
+		return err
+	}
+
+	// 初始化Helm Repo
+	if err := c.initHelmRepository(); err != nil {
 		return err
 	}
 
@@ -44,6 +69,76 @@ func (c *Config) initConfig() error {
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	if err := viper.ReadInConfig(); err != nil { // viper解析配置文件
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) initHelmRepository() error {
+	configBody, err := ioutil.ReadFile(fmt.Sprintf("./conf/%s", viper.GetString("helmConfig.config")))
+	if err != nil {
+		klog.Fatalln(err)
+		return err
+	}
+	err = yaml.Unmarshal(configBody, helmConfig)
+	if err != nil {
+		klog.Fatalln(err)
+		return err
+	}
+
+	// init repo
+	for _, c := range helmConfig.HelmRepos {
+		err = initRepository(c)
+		if err != nil {
+			klog.Fatalln(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func initRepository(c *repo.Entry) error {
+	// Ensure the file directory exists as it is required for file locking
+	err := os.MkdirAll(filepath.Dir(settings.RepositoryConfig), os.ModePerm)
+	if err != nil && !os.IsExist(err) {
+		return err
+	}
+
+	// Acquire a file lock for process synchronization
+	fileLock := flock.New(strings.Replace(settings.RepositoryConfig, filepath.Ext(settings.RepositoryConfig), ".lock", 1))
+	lockCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	locked, err := fileLock.TryLockContext(lockCtx, time.Second)
+	if err == nil && locked {
+		defer fileLock.Unlock()
+	}
+	if err != nil {
+		return err
+	}
+
+	b, err := ioutil.ReadFile(settings.RepositoryConfig)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	var f repo.File
+	if err := yaml.Unmarshal(b, &f); err != nil {
+		return err
+	}
+
+	r, err := repo.NewChartRepository(c, getter.All(settings))
+	if err != nil {
+		return err
+	}
+
+	if _, err := r.DownloadIndexFile(); err != nil {
+		return err
+	}
+
+	f.Update(c)
+
+	if err := f.WriteFile(settings.RepositoryConfig, 0644); err != nil {
 		return err
 	}
 

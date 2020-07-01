@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/teris-io/shortid"
 	"github.com/unknwon/com"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/kube"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -48,6 +50,11 @@ func SendResponse(c *gin.Context, err error, data interface{}) {
 		Message: message,
 		Data:    data,
 	})
+}
+
+func ActionConfigInit(namespace string) (*action.Configuration, error) {
+	actionConfig := new(action.Configuration)
+	clientConfig := kube.GetConfig(settings.KubeConfig, settings.KubeContext)
 }
 
 func CreateNamespace(namespace string, clientset kubernetes.Interface) {
