@@ -12,9 +12,12 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/gofrs/flock"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/kube"
 	"helm.sh/helm/v3/pkg/repo"
+	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog"
 	"sigs.k8s.io/yaml"
 )
@@ -24,8 +27,8 @@ type HelmConfig struct {
 }
 
 var (
-	settings   = cli.New()
-	helmConfig = &HelmConfig{}
+	Settings = cli.New()
+	HelmConf = &HelmConfig{}
 )
 
 type Config struct {
@@ -40,6 +43,12 @@ func Init(cfg string) error {
 	// 初始化配置文件
 	if err := c.initConfig(); err != nil {
 		return err
+	}
+
+	if Settings.KubeConfig == "" {
+		if home := homedir.HomeDir(); home != "" {
+			Settings.KubeConfig = filepath.Join(home, ".kube", "config-tencent")
+		}
 	}
 
 	// 初始化Helm Repo
@@ -81,14 +90,14 @@ func (c *Config) initHelmRepository() error {
 		klog.Fatalln(err)
 		return err
 	}
-	err = yaml.Unmarshal(configBody, helmConfig)
+	err = yaml.Unmarshal(configBody, HelmConf)
 	if err != nil {
 		klog.Fatalln(err)
 		return err
 	}
 
 	// init repo
-	for _, c := range helmConfig.HelmRepos {
+	for _, c := range HelmConf.HelmRepos {
 		err = initRepository(c)
 		if err != nil {
 			klog.Fatalln(err)
@@ -100,13 +109,13 @@ func (c *Config) initHelmRepository() error {
 
 func initRepository(c *repo.Entry) error {
 	// Ensure the file directory exists as it is required for file locking
-	err := os.MkdirAll(filepath.Dir(settings.RepositoryConfig), os.ModePerm)
+	err := os.MkdirAll(filepath.Dir(Settings.RepositoryConfig), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
 
 	// Acquire a file lock for process synchronization
-	fileLock := flock.New(strings.Replace(settings.RepositoryConfig, filepath.Ext(settings.RepositoryConfig), ".lock", 1))
+	fileLock := flock.New(strings.Replace(Settings.RepositoryConfig, filepath.Ext(Settings.RepositoryConfig), ".lock", 1))
 	lockCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	locked, err := fileLock.TryLockContext(lockCtx, time.Second)
@@ -117,7 +126,7 @@ func initRepository(c *repo.Entry) error {
 		return err
 	}
 
-	b, err := ioutil.ReadFile(settings.RepositoryConfig)
+	b, err := ioutil.ReadFile(Settings.RepositoryConfig)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -127,7 +136,7 @@ func initRepository(c *repo.Entry) error {
 		return err
 	}
 
-	r, err := repo.NewChartRepository(c, getter.All(settings))
+	r, err := repo.NewChartRepository(c, getter.All(Settings))
 	if err != nil {
 		return err
 	}
@@ -138,43 +147,30 @@ func initRepository(c *repo.Entry) error {
 
 	f.Update(c)
 
-	if err := f.WriteFile(settings.RepositoryConfig, 0644); err != nil {
+	if err := f.WriteFile(Settings.RepositoryConfig, 0644); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// func (c *Config) initLog() {
-// 	passLagerCfg := log.PassLagerCfg{
-// 		// 输出位置，有两个可选项 —— file 和 stdout。选择 file 会将日志记录到 logger_file 指定的日志文件中，
-// 		// 选择 stdout 会将日志输出到标准输出，当然也可以两者同时选择
-// 		Writers: viper.GetString("log.writers"),
+func ActionConfigInit(namespace string) (*action.Configuration, error) {
+	actionConfig := new(action.Configuration)
+	clientConfig := kube.GetConfig(Settings.KubeConfig, Settings.KubeContext, namespace)
+	if Settings.KubeToken != "" {
+		clientConfig.BearerToken = &Settings.KubeToken
+	}
+	if Settings.KubeAPIServer != "" {
+		clientConfig.APIServer = &Settings.KubeAPIServer
+	}
+	err := actionConfig.Init(clientConfig, namespace, os.Getenv("HELM_DRIVER"), klog.Infof)
+	if err != nil {
+		klog.Errorf("%+v", err)
+		return nil, err
+	}
 
-// 		// 日志级别，DEBUG、INFO、WARN、ERROR、FATAL
-// 		LoggerLevel: viper.GetString("log.logger_level"),
-
-// 		// 日志文件
-// 		LoggerFile: viper.GetString("log.logger_file"),
-
-// 		// 日志的输出格式，JSON 或者 plaintext，true 会输出成非 JSON 格式，false 会输出成 JSON 格式
-// 		LogFormatText: viper.GetBool("log.log_format_text"),
-
-// 		// rotate 依据，可选的有 daily 和 size。如果选 daily 则根据天进行转存，如果是 size 则根据大小进行转存
-// 		RollingPolicy: viper.GetString("log.rollingPolicy"),
-
-// 		// rotate 转存时间，配 合rollingPolicy: daily 使用
-// 		LogRotateDate: viper.GetInt("log.log_rotate_date"),
-
-// 		// rotate 转存大小，配合 rollingPolicy: size 使用
-// 		LogRotateSize: viper.GetInt("log.log_rotate_size"),
-
-// 		// 当日志文件达到转存标准时，log 系统会将该日志文件进行压缩备份，这里指定了备份文件的最大个数
-// 		LogBackupCount: viper.GetInt("log.log_backup_count"),
-// 	}
-
-// 	log.InitWithConfig(&passLagerCfg)
-// }
+	return actionConfig, nil
+}
 
 // 监控配置文件变化并热加载程序
 func (c *Config) watchConfig() {

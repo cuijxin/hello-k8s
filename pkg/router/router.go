@@ -4,6 +4,10 @@ import (
 	_ "hello-k8s/docs"
 	mysql5cluster "hello-k8s/pkg/api/v1/clusters/mysql5"
 	pgcluster "hello-k8s/pkg/api/v1/clusters/postgres"
+	"hello-k8s/pkg/api/v1/helm/charts"
+	"hello-k8s/pkg/api/v1/helm/envs"
+	"hello-k8s/pkg/api/v1/helm/releases"
+	"hello-k8s/pkg/api/v1/helm/repositories"
 	"hello-k8s/pkg/api/v1/operators/mysql5"
 	"hello-k8s/pkg/api/v1/operators/postgres"
 	"hello-k8s/pkg/api/v1/resources/configmap"
@@ -118,6 +122,19 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		r.GET("/pod/list/:namespace", pod.GetPodList)
 		r.GET("/pod/container/:podId/:namespace", container.GetPodContainers)
 		r.GET("/container/logs/:namespace/:podId/:container", container.GetLogs)
+	}
+
+	h := g.Group("/v1/helm")
+	{
+		h.GET("/repositories/charts", repositories.ListRepoCharts)
+		h.PUT("/repositories", repositories.UpdateRepositories)
+
+		h.GET("/charts", charts.GetChartInfo)
+
+		h.GET("/envs", envs.GetHelmEnvs)
+
+		h.GET("/namespaces/:namespace/releases", releases.ListReleases)
+		h.GET("/namespaces/:namespace/releases/:release", releases.ShowReleaseInfo)
 	}
 
 	// The health check handlers

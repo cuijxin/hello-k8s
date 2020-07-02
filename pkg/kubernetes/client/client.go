@@ -6,7 +6,6 @@ import (
 	mysql5Clientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
 	pgClientset "github.com/cuijxin/postgres-operator-atom/pkg/generated/clientset/versioned"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/klog"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -88,11 +87,8 @@ func NewApiExtensionsClient() (*apiextensionsclientset.Clientset, error) {
 
 func getKubernetesConfig() (*rest.Config, error) {
 	var kubeconfig *string
-	var tmp string
 	if home := homedir.HomeDir(); home != "" {
-		klog.Infof("home dir is:%v", home)
-		tmp = filepath.Join(home, ".kube", "config-tencent")
-		klog.Infof("config path is:%v", tmp)
+		tmp := filepath.Join(home, ".kube", "config-tencent")
 		kubeconfig = &tmp
 	}
 

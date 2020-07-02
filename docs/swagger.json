@@ -195,6 +195,229 @@
                 }
             }
         },
+        "/v1/helm/charts": {
+            "get": {
+                "description": "获取指定chart的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "获取指定chart的详细信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "指定chart的name",
+                        "name": "chart",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "指定想要获取的信息：readme/values/chart",
+                        "name": "info",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "指定想要获取信息的chart的版本",
+                        "name": "version",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/helm/envs": {
+            "get": {
+                "description": "获取指定Helm的Envs信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "获取指定Helm的Envs信息",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/helm/namespaces/{namespace}/releases": {
+            "get": {
+                "description": "获取releases列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "获取releases列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/helm/namespaces/{namespace}/releases/{release}": {
+            "get": {
+                "description": "获取指定release的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "获取指定release的详细信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "release名",
+                        "name": "release",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "info:待获取信息的类型，可选值[all,hooks,manifest,notes,values]",
+                        "name": "info",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/helm/repositories": {
+            "put": {
+                "description": "更新Helm的Repository信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "更新Helm的Repository信息",
+                "parameters": [
+                    {
+                        "description": "更新Helm Repositories信息所需参数.",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/config.HelmConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":0,\"message\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/helm/repositories/charts": {
+            "get": {
+                "description": "获取Helm的Repo中的Chart列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "helm"
+                ],
+                "summary": "获取Helm的Repo中的Chart列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "chart version",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "if true, all versions",
+                        "name": "versions",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search keyword",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"mmessage\":\"OK\",\"data\":{\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/tool.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/resource/configmap/create": {
             "post": {
                 "description": "创建 ConfigMap 对象",
@@ -1448,6 +1671,14 @@
                 },
                 "storageClassName": {
                     "description": "StorageClassName 存储类名称",
+                    "type": "string"
+                }
+            }
+        },
+        "config.HelmConfig": {
+            "type": "object",
+            "properties": {
+                "helmRepos": {
                     "type": "string"
                 }
             }

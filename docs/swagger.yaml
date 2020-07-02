@@ -36,6 +36,11 @@ definitions:
         description: StorageClassName 存储类名称
         type: string
     type: object
+  config.HelmConfig:
+    properties:
+      helmRepos:
+        type: string
+    type: object
   configmap.ConfigMapItem:
     properties:
       key:
@@ -567,6 +572,153 @@ paths:
       summary: 创建 Postgresql 集群
       tags:
       - add-on
+  /v1/helm/charts:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定chart的详细信息
+      parameters:
+      - description: 指定chart的name
+        in: query
+        name: chart
+        required: true
+        type: string
+      - description: 指定想要获取的信息：readme/values/chart
+        in: query
+        name: info
+        required: true
+        type: string
+      - description: 指定想要获取信息的chart的版本
+        in: query
+        name: version
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取指定chart的详细信息
+      tags:
+      - helm
+  /v1/helm/envs:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定Helm的Envs信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取指定Helm的Envs信息
+      tags:
+      - helm
+  /v1/helm/namespaces/{namespace}/releases:
+    get:
+      consumes:
+      - application/json
+      description: 获取releases列表
+      parameters:
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取releases列表
+      tags:
+      - helm
+  /v1/helm/namespaces/{namespace}/releases/{release}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定release的详细信息
+      parameters:
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: release名
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: info:待获取信息的类型，可选值[all,hooks,manifest,notes,values]
+        in: query
+        name: info
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取指定release的详细信息
+      tags:
+      - helm
+  /v1/helm/repositories:
+    put:
+      consumes:
+      - application/json
+      description: 更新Helm的Repository信息
+      parameters:
+      - description: 更新Helm Repositories信息所需参数.
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/config.HelmConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 更新Helm的Repository信息
+      tags:
+      - helm
+  /v1/helm/repositories/charts:
+    get:
+      consumes:
+      - application/json
+      description: 获取Helm的Repo中的Chart列表
+      parameters:
+      - description: chart version
+        in: query
+        name: version
+        type: string
+      - description: if true, all versions
+        in: query
+        name: versions
+        type: string
+      - description: search keyword
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"mmessage":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取Helm的Repo中的Chart列表
+      tags:
+      - helm
   /v1/resource/configmap/create:
     post:
       consumes:

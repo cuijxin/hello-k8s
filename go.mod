@@ -3,7 +3,7 @@ module hello-k8s
 go 1.13
 
 require (
-	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/Masterminds/semver v1.5.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/cuijxin/mysql-operator v0.18.2
@@ -19,6 +19,7 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jinzhu/gorm v1.9.12
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.6.0
 	github.com/shirou/gopsutil v2.20.1+incompatible
 	github.com/spf13/pflag v1.0.5
@@ -49,5 +50,6 @@ require (
 	k8s.io/heapster v1.5.4
 	k8s.io/helm v2.16.9+incompatible
 	k8s.io/klog v1.0.0
+	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/yaml v1.2.0
 )
