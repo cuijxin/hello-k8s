@@ -1,3 +1,5 @@
 helmRepos:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
   - name: stable
     url: https://apphub.aliyuncs.com/stable

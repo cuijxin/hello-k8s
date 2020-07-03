@@ -135,6 +135,12 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 
 		h.GET("/namespaces/:namespace/releases", releases.ListReleases)
 		h.GET("/namespaces/:namespace/releases/:release", releases.ShowReleaseInfo)
+		h.POST("/namespaces/:namespace/releases/:release", releases.InstallRelease)
+		h.PUT("/namespaces/:namespace/releases/:release", releases.UpgradeRelease)
+		h.DELETE("/namespaces/:namespace/releases/:release", releases.UnInstallRelease)
+		h.PUT("/namespaces/:namespace/releases/:release/versions/:reversion", releases.RollBackRelease)
+		h.GET("/namespaces/:namespace/releases/:release/status", releases.GetReleaseStatus)
+		h.GET("/namespaces/:namespace/releases/:release/histories", releases.ListReleaseHistories)
 	}
 
 	// The health check handlers

@@ -384,6 +384,19 @@ definitions:
       storageClass:
         type: string
     type: object
+  releases.ReleaseOptions:
+    properties:
+      set:
+        items:
+          type: string
+        type: array
+      set_string:
+        items:
+          type: string
+        type: array
+      values:
+        type: string
+    type: object
   secret.CreateSecretRequest:
     properties:
       item:
@@ -639,6 +652,31 @@ paths:
       tags:
       - helm
   /v1/helm/namespaces/{namespace}/releases/{release}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定的Release
+      parameters:
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 删除指定的Release
+      tags:
+      - helm
     get:
       consumes:
       - application/json
@@ -667,6 +705,161 @@ paths:
           schema:
             $ref: '#/definitions/tool.Response'
       summary: 获取指定release的详细信息
+      tags:
+      - helm
+    post:
+      consumes:
+      - application/json
+      description: 安装Release
+      parameters:
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: chart名
+        in: query
+        name: chart
+        required: true
+        type: string
+      - description: 安装release时的参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/releases.ReleaseOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 安装Release
+      tags:
+      - helm
+    put:
+      consumes:
+      - application/json
+      description: 升级Release版本
+      parameters:
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: chart名
+        in: query
+        name: chart
+        required: true
+        type: string
+      - description: release参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/releases.ReleaseOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 升级Release版本
+      tags:
+      - helm
+  /v1/helm/namespaces/{namespace}/releases/{release}/histories:
+    get:
+      consumes:
+      - application/json
+      description: 获取Release历史版本信息
+      parameters:
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取Release历史版本信息
+      tags:
+      - helm
+  /v1/helm/namespaces/{namespace}/releases/{release}/status:
+    get:
+      consumes:
+      - application/json
+      description: 获取Release的Status信息
+      parameters:
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 获取Release的Status信息
+      tags:
+      - helm
+  /v1/helm/namespaces/{namespace}/releases/{release}/versions/{reversion}:
+    put:
+      consumes:
+      - application/json
+      description: 回滚Release版本
+      parameters:
+      - description: release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: 版本
+        in: path
+        name: reversion
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":0,"message":"OK","data":{""}}'
+          schema:
+            $ref: '#/definitions/tool.Response'
+      summary: 回滚Release版本
       tags:
       - helm
   /v1/helm/repositories:

@@ -21,7 +21,7 @@ func buildSearchIndex(version string) (*search.Index, error) {
 		f := filepath.Join(config.Settings.RepositoryCache, helmpath.CacheIndexFile(n))
 		ind, err := repo.LoadIndexFile(f)
 		if err != nil {
-			klog.Fatalf("WARNING: Repo %q is corrupt or missing. Try 'helm repo update'.", n)
+			klog.Infof("WARNING: Repo %q is corrupt or missing. Try 'helm repo update'.", n)
 			continue
 		}
 

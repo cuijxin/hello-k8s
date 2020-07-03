@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/klog"
 )
 
@@ -53,5 +54,25 @@ func ShowReleaseInfo(c *gin.Context) {
 		return
 	}
 
-	tool.SendResponse(c, errno.OK, nil)
+	client := action.NewGet(actionConfig)
+	results, err := client.Run(name)
+	if err != nil {
+		tool.SendResponse(c, errno.InternalServerError, err)
+		return
+	}
+	if info == "all" {
+		results.Chart = nil
+		tool.SendResponse(c, errno.OK, results)
+		return
+	} else if info == "hooks" {
+		if len(results.Hooks) < 1 {
+			tool.SendResponse(c, errno.OK, []*release.Hook{})
+			return
+		}
+		tool.SendResponse(c, errno.OK, results.Hooks)
+		return
+	} else if info == "notes" {
+		tool.SendResponse(c, errno.OK, results.Info.Notes)
+		return
+	}
 }

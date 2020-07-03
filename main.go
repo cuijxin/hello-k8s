@@ -63,7 +63,7 @@ func main() {
 	// Ping the server to make sure the router is working.
 	go func() {
 		if err := pingServer(); err != nil {
-			klog.Fatalf("The router has no response, or it might took too long to start up: %v", err)
+			klog.Infof("The router has no response, or it might took too long to start up: %v", err)
 		}
 
 		klog.Info("The router has been deployed successfully.")

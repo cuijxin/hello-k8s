@@ -45,14 +45,14 @@ func GetChartInfo(c *gin.Context) {
 
 	cp, err := client.ChartPathOptions.LocateChart(name, config.Settings)
 	if err != nil {
-		klog.Fatalf("got error: %v", err)
+		klog.Infof("got error: %v", err)
 		tool.SendResponse(c, errno.InternalServerError, err)
 		return
 	}
 
 	chrt, err := loader.Load(cp)
 	if err != nil {
-		klog.Fatalf("got error: %v", err)
+		klog.Infof("got error: %v", err)
 		tool.SendResponse(c, errno.InternalServerError, err)
 		return
 	}
